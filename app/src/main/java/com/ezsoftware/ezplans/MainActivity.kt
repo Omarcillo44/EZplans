@@ -66,7 +66,6 @@ import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
-    private val themeViewModel: ThemeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,8 +88,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavegacion(themeViewModel)
-                    //AppRoot(themeViewModel)
+                    //AppNavegacion(themeViewModel)
+                    AppRoot(themeViewModel)
                 }
             }
         }
@@ -122,8 +121,7 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
 
 @Composable
 fun UIPrincipal(navControlador: NavController, themeViewModel: ThemeViewModel) {
-    //val auxSQLite = DBHelper(LocalContext.current)
-    //VistaProductos(auxSQLite, navControlador, themeViewModel)
+
     VistaInicio(navControlador, themeViewModel)
 }
 

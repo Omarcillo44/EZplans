@@ -6,10 +6,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 
 object RetrofitInstance {
+
+    val url: String = "https://9900-2806-2f0-90a0-63fc-6425-36c0-9f2-f53a.ngrok-free.app/"
+
     val api: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl( //Dirección del localhost, cambiala por la tuya
-                "https://05c5-2806-2f0-90a0-63fc-68eb-4626-dc2-1745.ngrok-free.app"
+                url
             )
             .addConverterFactory(JacksonConverterFactory.create(
                 jacksonObjectMapper().registerKotlinModule()
