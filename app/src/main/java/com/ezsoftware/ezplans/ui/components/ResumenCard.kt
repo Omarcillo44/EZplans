@@ -30,12 +30,13 @@ fun ResumenCard(
     titulo: String,
     cantidad: String,
     alturaMax: Int,
+    modifier: Modifier = Modifier, // Parámetro para que no se suicide el ancho
     altura: (Int) -> Unit
 ) {
     val density = LocalDensity.current
 
     Card(
-        modifier = Modifier
+        modifier = modifier // Usa el modifier recibido primero, sino cómo xdxdxd
             .fillMaxWidth()
             .then(
                 if (alturaMax > 0)
