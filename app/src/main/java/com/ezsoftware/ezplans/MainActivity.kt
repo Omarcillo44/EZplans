@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.ui.components.DashboardComponent
 import com.ezsoftware.ezplans.ui.components.LoginScreen
 import com.ezsoftware.ezplans.ui.components.MenuFab
 import com.ezsoftware.ezplans.ui.components.PlanesCard
@@ -63,6 +64,7 @@ import com.ezsoftware.ezplans.ui.components.ResumenCard
 import com.ezsoftware.ezplans.ui.components.Titulo
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
+import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
@@ -74,10 +76,8 @@ class MainActivity : ComponentActivity() {
         val prefs = PreferenceHelper(applicationContext)
         val isDarkTheme = prefs.leerEstadoModoOscuro()
 
-        // Asegúrate de acceder a tu ViewModel así:
         val themeViewModel: ThemeViewModel by viewModels()
 
-        // Actualiza el estado antes de setContent
         themeViewModel.setDarkTheme(isDarkTheme)
 
         setContent {
@@ -121,180 +121,18 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
 
 @Composable
 fun UIPrincipal(navControlador: NavController, themeViewModel: ThemeViewModel) {
+    val dashboardViewModel: DashboardViewModel = viewModel()
 
-    VistaInicio(navControlador, themeViewModel)
-}
+    Column(modifier = Modifier.fillMaxSize()) {
+        Titulo("Resumen")
+        DashboardComponent(dashboardViewModel)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun VistaInicio(navControlador: NavController, themeViewModel: ThemeViewModel){
-    var showHelpDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    //val productos = remember { mutableStateOf(dbManager.obtenerProductos()) }
+        Spacer(modifier = Modifier.height(25.dp))
 
-    var alertaEliminacion by remember { mutableStateOf(false) }
-    //var productoAEliminar by remember { mutableStateOf<Producto?>(null) }
-    var showThemeDialog by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            LazyColumn {
-                item {
-                    Titulo("Resumen")
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-
-                item {
-                    // variable para que todas las tarjetas tengan la misma altura
-                    var alturaCardsRes by remember { mutableIntStateOf(0) }
-
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResumenCard("Planes administrados", "15", alturaCardsRes) { h ->
-                                    if (h > alturaCardsRes) alturaCardsRes = h
-                                }
-                            }
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResumenCard("Planes participante", "6", alturaCardsRes) { h ->
-                                    if (h > alturaCardsRes) alturaCardsRes = h
-                                }
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResumenCard("Deudas pendientes", "$100,000.00", alturaCardsRes) { h ->
-                                    if (h > alturaCardsRes) alturaCardsRes = h
-                                }
-                            }
-                            Box(modifier = Modifier.weight(1f)) {
-                                ResumenCard("Por cobrar", "$100,000.00", alturaCardsRes) { h ->
-                                    if (h > alturaCardsRes) alturaCardsRes = h
-                                }
-                            }
-                        }
-                    }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(25.dp))
-                    Row (
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Titulo("Mis planes")
-
-                        val opciones = listOf("Completos", "Pendientes")
-                        var expandido by remember { mutableStateOf(false) }
-                        var seleccion by remember { mutableStateOf(opciones[0]) }
-
-                        ExposedDropdownMenuBox(
-                            modifier = Modifier.width(180.dp).height(50.dp),
-                            expanded = expandido,
-                            onExpandedChange = { expandido = !expandido }
-                        ) {
-                            TextField(
-                                value = seleccion,
-                                onValueChange = {},
-                                readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido) },
-                                modifier = Modifier.menuAnchor()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandido,
-                                onDismissRequest = { expandido = false }
-                            ) {
-                                opciones.forEach { opcion ->
-                                    DropdownMenuItem(
-                                        text = { Text(opcion) },
-                                        onClick = {
-                                            seleccion = opcion
-                                            expandido = false
-                                            when (opcion) {
-                                                "Completos" -> {
-                                                    // Aquí va la lógica para completos
-                                                    Toast.makeText(context, "Mostrando tareas completas", Toast.LENGTH_SHORT).show()
-                                                }
-                                                "Pendientes" -> {
-                                                    // Aquí va la lógica para pendientes
-                                                    Toast.makeText(context, "Mostrando tareas pendientes", Toast.LENGTH_SHORT).show()
-                                                }
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-                }
-
-                //items(productos.value) { producto ->
-                item{
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(16.dp))
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(15.dp))
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(15.dp))
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(15.dp))
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(15.dp))
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(15.dp))
-                    PlanesCard()
-                    Spacer(modifier = Modifier.size(15.dp))
-                }
-                /*
-                PlanesCard(
-                    producto = producto,
-                    onEditar = { navControlador.navigate("EditarProducto/${producto.id}") },
-                    onEliminar = { productoAEliminar = producto; alertaEliminacion = true },
-                    onClick = { Toast.makeText(context, "Producto #${producto.id}", Toast.LENGTH_SHORT).show() }
-                )
-                */
-                //}
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 96.dp, end = 16.dp) // Padding generoso
-        ) {
-            MenuFab(
-                onAyudaClick = { showHelpDialog = true },
-                onTemaClick = { showThemeDialog = true }
-            )
-        }
-
-
-        if (showHelpDialog) {
-            DialogoAyuda { showHelpDialog = false }
-        }
-
-        if (showThemeDialog) {
-            DialogoTema(
-                onClose = { showThemeDialog = false },
-                themeViewModel = themeViewModel
-            )
-        }
+        Titulo("Mis planes")
+        PlanesCard()
+        Spacer(modifier = Modifier.size(16.dp))
+        PlanesCard()
     }
 }
 
@@ -451,16 +289,4 @@ fun DialogoTema(
             }
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun VistaInicioPreview() {
-    // Mock de NavController
-    val navController = rememberNavController()
-
-    // Mock de ThemeViewModel (puede necesitar una implementación vacía o simulada)
-    val themeViewModel = remember { ThemeViewModel() }
-
-    VistaInicio(navController, themeViewModel)
 }

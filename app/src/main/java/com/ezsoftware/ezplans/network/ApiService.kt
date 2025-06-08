@@ -3,7 +3,6 @@ package com.ezsoftware.ezplans.network
 import com.ezsoftware.ezplans.models.acceso.AccesoRequest
 import com.ezsoftware.ezplans.models.acceso.AccesoResponse
 import com.ezsoftware.ezplans.models.dashboard.datosDashboard
-import com.ezsoftware.ezplans.models.user.DatosUsuarioRequest
 import com.ezsoftware.ezplans.models.user.DatosUsuarioResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -27,7 +26,8 @@ interface ApiService {
         @Query("idUsuario") idUsuario: Int,
         @Query("soloCompletos") soloCompletos: Boolean?,
         @Query("esAdmin") esAdmin: Boolean?,
-        @Header("Authorization") token: String  // Agregar el token de autenticación
+        @Header("Authorization") token: String
     ): Response<datosDashboard>
+
 
 }

@@ -52,7 +52,8 @@ fun LoginScreen(viewModel: AutenticacionViewModel, onLoginSuccess: () -> Unit) {
         OutlinedTextField(value = pass, onValueChange = { pass = it }, label = { Text("Contraseña") }, visualTransformation = PasswordVisualTransformation())
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
-            viewModel.login(celular, pass,
+            //viewModel.login(celular, pass,
+            viewModel.login("5561397608", "contraseña",
                 onSuccess = { onLoginSuccess() },
                 onError = { error = it }
             )
