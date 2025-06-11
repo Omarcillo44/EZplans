@@ -7,7 +7,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 
 object RetrofitInstance {
 
-    val url: String = "https://0369-2806-2f0-90a0-63fc-a19a-daa-6a1a-8595.ngrok-free.app/"
+    val url: String = "https://stag-improved-wildcat.ngrok-free.app/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()

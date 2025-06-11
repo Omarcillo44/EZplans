@@ -19,6 +19,19 @@ fun Titulo(
 }
 
 @Composable
+fun SubTitulo(
+    titulo: String,
+    bold: Boolean
+){
+    Text(
+        text = titulo,
+        fontSize = 20.sp,
+        fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+}
+
+@Composable
 fun Texto(
     texto: String,
     bold: Boolean

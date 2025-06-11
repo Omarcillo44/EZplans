@@ -5,12 +5,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.models.dashboard.datosDashboard
 import com.ezsoftware.ezplans.models.dashboard.datosPlan
 import com.ezsoftware.ezplans.models.dashboard.datosResumen
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.ui.components.DialogoAyuda
+import com.ezsoftware.ezplans.ui.components.DialogoTema
+import com.ezsoftware.ezplans.ui.components.MenuFab
 import com.ezsoftware.ezplans.ui.components.PlanesCard
 import com.ezsoftware.ezplans.ui.components.ResumenCard
 import com.ezsoftware.ezplans.ui.components.Titulo
@@ -26,6 +31,9 @@ fun DashboardComponent(navControlador: NavController, themeViewModel: ThemeViewM
     var datosDashboard by remember { mutableStateOf<datosDashboard?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var soloCompletos by remember { mutableStateOf<Boolean?>(null) }
+
+    var mostrarAyuda by remember { mutableStateOf(false) }
+    var mostrarTema by remember { mutableStateOf(false) }
 
     // Función para cargar datos
     fun cargarDatos() {
@@ -78,6 +86,14 @@ fun DashboardComponent(navControlador: NavController, themeViewModel: ThemeViewM
             }
         }
     }
+
+    MenuFab(
+        navControlador,
+        onAyudaClick = { mostrarAyuda = true },
+        onTemaClick = { mostrarTema = true }
+    )
+    if (mostrarAyuda) DialogoAyuda { mostrarAyuda = false }
+    if (mostrarTema) DialogoTema(onClose = { mostrarTema = false }, themeViewModel = themeViewModel)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
