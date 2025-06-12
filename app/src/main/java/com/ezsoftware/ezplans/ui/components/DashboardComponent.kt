@@ -5,9 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.models.dashboard.datosDashboard
 import com.ezsoftware.ezplans.models.dashboard.datosPlan
@@ -157,50 +155,38 @@ fun SeccionTituloConFiltro(
 
 @Composable
 fun SeccionResumen(datosResumen: datosResumen) {
-    var alturaCardsRes by remember { mutableIntStateOf(0) }
-
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ResumenCard(
                 titulo = "Planes administrados",
                 cantidad = datosResumen.planesAdministrados.toString(),
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
             ResumenCard(
                 titulo = "Planes participante",
                 cantidad = datosResumen.planesMiembro.toString(),
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ResumenCard(
                 titulo = "Deudas pendientes",
                 cantidad = datosResumen.deudasPendientes,
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
             ResumenCard(
                 titulo = "Por cobrar",
                 cantidad = datosResumen.deudasPorCobrar,
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
         }
     }
 }

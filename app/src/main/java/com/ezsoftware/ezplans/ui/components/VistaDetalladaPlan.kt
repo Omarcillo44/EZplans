@@ -22,9 +22,9 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +50,16 @@ data class Miembro(
     val debe: String,
     val haPagado: String
 )
+
+// Data class para las deudas
+data class Deuda(
+    val deudor: String,
+    val acreedor: String,
+    val motivo: String,
+    val monto: String,
+    val estado: String
+)
+
 //----------------- sustituir por la obtencion normal de datos ------------------//
 val actividades = listOf(
     Actividad("Actividad absolutamente sana parte del plan sano", "$100000.00", "5 miembros", "pendiente"),
@@ -66,6 +76,15 @@ val miembros = listOf(
     Miembro("Omar Lorenzo", "5555555555", "$100000.00", "$100000.00"),
     Miembro("Omar Lorenzo", "5555555555", "$100000.00", "$100000.00")
 )
+
+val deudas = listOf(
+    Deuda("Carlos López", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente"),
+    Deuda("Pus Yo", "Otro Yo", "Cena en restaurante", "$800", "Pendiente"),
+    Deuda("Maurisio Ekisde", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente"),
+    Deuda("Carlos López", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente"),
+    Deuda("Carlos López", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente")
+)
+
 //-------------------------------    -------------------------------//
 
 
@@ -84,7 +103,7 @@ fun VistaDetalladaPlan(navControlador: NavController, themeViewModel: ThemeViewM
 
             item { ResumenDet() }
 
-            item { TabsPlan(actividades, miembros) }
+            item { TabsPlan(actividades, miembros, deudas) }
         }
     }
 
@@ -114,17 +133,19 @@ fun TituloVistaDet(){
         }
         Column(
             modifier = Modifier
-                .fillMaxHeight(), 
+                .fillMaxHeight(),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             Row {
                 Imagen("placeholder", 20)
+                Spacer(modifier = Modifier.size(5.dp))
                 TextoPeq("10-06-05")
             }
             Spacer(modifier = Modifier.size(10.dp))
             Row {
                 Imagen("placeholder", 20)
+                Spacer(modifier = Modifier.size(5.dp))
                 TextoPeq("Pendiente")
             }
         }
@@ -153,59 +174,47 @@ fun ProgressBar(){
 
 @Composable
 fun ResumenDet(){
-    var alturaCardsRes by remember { mutableIntStateOf(0) }
-
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ResumenCard(
                 titulo = "Gato Total",
                 cantidad = "$100,000.0",
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
             ResumenCard(
                 titulo = "Miembros",
                 cantidad = "6",
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ResumenCard(
                 titulo = "Actividades",
                 cantidad = "2/4",
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
             ResumenCard(
                 titulo = "Deudas pendientes",
                 cantidad = "3",
-                alturaMax = alturaCardsRes,
                 modifier = Modifier.weight(1f)
-            ) { h ->
-                alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-            }
+            )
         }
     }
     Spacer(modifier = Modifier.height(20.dp))
 }
 
 @Composable
-fun TabsPlan(actividades: List<Actividad>, miembros: List<Miembro>) {
+fun TabsPlan(actividades: List<Actividad>, miembros: List<Miembro>, deudas : List<Deuda>) {
     val tabs = listOf("Actividades", "Miembros", "Deudas")
-    val selectedTab = remember { mutableStateOf(0) }
+    val selectedTab = rememberSaveable { mutableStateOf(0) }
 
     Column {
         TabRow(selectedTabIndex = selectedTab.value) {
@@ -221,7 +230,7 @@ fun TabsPlan(actividades: List<Actividad>, miembros: List<Miembro>) {
         when (selectedTab.value) {
             0 -> TabActividades(actividades)
             1 -> TabMiembros(miembros)
-            2 -> TabDeudas()
+            2 -> TabDeudas(deudas)
         }
     }
 }

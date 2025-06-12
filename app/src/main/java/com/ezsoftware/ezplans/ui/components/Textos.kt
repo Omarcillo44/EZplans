@@ -3,6 +3,7 @@ package com.ezsoftware.ezplans.ui.components
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
@@ -45,6 +46,20 @@ fun Texto(
 }
 
 @Composable
+fun Texto(
+    texto: String,
+    bold: Boolean,
+    color: Color
+){
+    Text(
+        text = texto,
+        fontSize = 18.sp,
+        fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+        color = color
+    )
+}
+
+@Composable
 fun TextoPeq(
     texto: String
 ){
@@ -54,6 +69,19 @@ fun TextoPeq(
         color = MaterialTheme.colorScheme.onSurface
     )
 }
+
+@Composable
+fun TextoPeq(
+    texto: String,
+    color: Color
+){
+    Text(
+        text = texto,
+        fontSize = 16.sp,
+        color = color
+    )
+}
+
 
 
 

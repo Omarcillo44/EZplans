@@ -1,32 +1,39 @@
 package com.ezsoftware.ezplans.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun TabActividades(datos: List<Actividad>) {
@@ -37,35 +44,32 @@ fun TabActividades(datos: List<Actividad>) {
             .padding(horizontal = 5.dp, vertical = 12.dp)
     ){
         filas.forEach { fila ->
-            var alturaCardsRes by remember { mutableIntStateOf(0) }
-
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min), // fuerza que todos los hijos tengan la altura mínima necesaria, igual para todos
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CardTabActividad(titulo = fila[0].titulo,
+                CardTabActividad(
+                    titulo = fila[0].titulo,
                     gasto = fila[0].gasto,
                     miembros = fila[0].miembros,
                     estado = fila[0].estado,
-                    alturaMax = alturaCardsRes,
-                    modifier = Modifier.weight(1f)
-                ) { h ->
-                    alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-                }
+                    modifier = Modifier.weight(1f).fillMaxHeight() // se estira para ocupar la altura del Row
+                )
                 if (fila.size > 1) {
-                    CardTabActividad(titulo = fila[1].titulo,
+                    CardTabActividad(
+                        titulo = fila[1].titulo,
                         gasto = fila[1].gasto,
                         miembros = fila[1].miembros,
                         estado = fila[1].estado,
-                        alturaMax = alturaCardsRes,
-                        modifier = Modifier.weight(1f)
-                    ) { h ->
-                        alturaCardsRes = h.coerceAtLeast(alturaCardsRes)
-                    }
+                        modifier = Modifier.weight(1f).fillMaxHeight() // igual
+                    )
                 } else {
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
+
         }
     }
 }
@@ -87,12 +91,19 @@ fun TabMiembros(datos: List<Miembro>) {
 }
 
 @Composable
-fun TabDeudas() {
+fun TabDeudas(datos: List<Deuda>) {
     Column (verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 12.dp)
     ){
-        //Contenido
+        datos.forEach{ dato ->
+            CardTabDeudas(deudor = dato.deudor,
+                acreedor = dato.acreedor,
+                motivo = dato.motivo,
+                monto= dato.monto,
+                estado= dato.estado
+            )
+        }
     }
 }
 
@@ -104,23 +115,12 @@ fun CardTabActividad(
     gasto: String,
     miembros: String,
     estado: String,
-    alturaMax: Int,
     modifier: Modifier = Modifier, // Parámetro para que no se suicide el ancho
-    altura: (Int) -> Unit
 ) {
     val density = LocalDensity.current
 
     Card(
         modifier = modifier // Usa el modifier recibido primero, sino cómo xdxdxd
-            .fillMaxWidth()
-            .then(
-                if (alturaMax > 0)
-                    Modifier.height(with(density) { alturaMax.toDp() })
-                else Modifier
-            )
-            .onGloballyPositioned {
-                altura(it.size.height)
-            }
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(15.dp)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(15.dp),
@@ -156,7 +156,6 @@ fun CardTabActividad(
                     TextoPeq(estado)
                 }
             }
-
         }
     }
 }
@@ -225,6 +224,120 @@ fun CardTabMiembros(
                     Imagen("placeholder", 20)
                     Spacer(modifier = Modifier.size(5.dp))
                     TextoPeq(haber)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CardTabDeudas(
+    deudor: String,
+    acreedor: String,
+    motivo: String,
+    monto: String,
+    estado: String
+){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 0.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(15.dp)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TextoPeq(
+                            deudor.split(" ")
+                                .mapNotNull { it.firstOrNull()?.toString() }
+                                .joinToString(""),
+                            MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    TextoPeq("debe a")
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TextoPeq(
+                            acreedor.split(" ")
+                                .mapNotNull { it.firstOrNull()?.toString() }
+                                .joinToString(""),
+                            MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Column {
+                        Row {
+                            Texto(deudor, false)
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null
+                            )
+                            Texto(acreedor, false)
+                        }
+                        Row {
+                            TextoPeq("Por: ")
+                            TextoPeq(motivo)
+                        }
+                    }
+                }
+            }
+            Column (
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.SpaceBetween
+            ){
+                Row {
+                    Texto(monto,true, MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Texto(estado, false)
+                }
+                Spacer(modifier = Modifier.size(5.dp))
+                Row {
+                    Button(
+                        onClick = { /* acción */ },
+                        modifier = Modifier.wrapContentSize().height(35.dp),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        //Imagen("placeholder", 20)
+                        //Spacer(modifier = Modifier.size(5.dp))
+                        Text("Registrar Pago", fontSize = 12.sp)
+                    }
                 }
             }
         }
