@@ -23,8 +23,6 @@ fun ResumenCard(
     cantidad: String,
     modifier: Modifier = Modifier, // Parámetro para que no se suicide el ancho
 ) {
-    val density = LocalDensity.current
-
     Card(
         modifier = modifier // Usa el modifier recibido primero, sino cómo xdxdxd
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(15.dp)),
