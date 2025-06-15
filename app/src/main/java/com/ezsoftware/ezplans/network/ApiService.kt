@@ -1,5 +1,6 @@
 package com.ezsoftware.ezplans.network
 
+import com.ezsoftware.ezplans.models.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.models.acceso.AccesoRequest
 import com.ezsoftware.ezplans.models.acceso.AccesoResponse
 import com.ezsoftware.ezplans.models.dashboard.datosDashboard
@@ -29,5 +30,11 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<datosDashboard>
 
+
+    @GET("/planes/vista_detallada")
+    suspend fun obtenerVistaDetalladaPlan(
+        @Query("idPlan") idPlan: Int,
+        @Header("Authorization") token: String
+    ): Response<DatosVistaDetalladaPlan>
 
 }

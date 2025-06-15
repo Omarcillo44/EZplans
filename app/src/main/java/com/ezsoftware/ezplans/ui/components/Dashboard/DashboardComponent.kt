@@ -1,3 +1,5 @@
+package com.ezsoftware.ezplans.ui.components.Dashboard
+
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,14 +18,17 @@ import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.ui.components.DialogoAyuda
 import com.ezsoftware.ezplans.ui.components.DialogoTema
 import com.ezsoftware.ezplans.ui.components.MenuFab
-import com.ezsoftware.ezplans.ui.components.PlanesCard
-import com.ezsoftware.ezplans.ui.components.ResumenCard
 import com.ezsoftware.ezplans.ui.components.Titulo
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
+import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 
 @Composable
-fun DashboardComponent(navControlador: NavController, themeViewModel: ThemeViewModel, viewModel: DashboardViewModel) {
+fun DashboardComponent(
+    navControlador: NavController,
+    themeViewModel: ThemeViewModel,
+    dashboardViewModel: DashboardViewModel,
+    vistaDetalladaViewModel: VistaDetalladaViewModel) {
     val context = LocalContext.current
 
     // Recuperar datos desde el ViewModel
@@ -38,7 +43,7 @@ fun DashboardComponent(navControlador: NavController, themeViewModel: ThemeViewM
     // Función para cargar datos
     fun cargarDatos() {
         idUsuario?.let {
-            viewModel.obtenerDatosDashboard(
+            dashboardViewModel.obtenerDatosDashboard(
                 idUsuario = it,
                 soloCompletos = soloCompletos,
                 esAdmin = null,
@@ -82,8 +87,7 @@ fun DashboardComponent(navControlador: NavController, themeViewModel: ThemeViewM
                 }
 
                 item { Spacer(modifier = Modifier.height(15.dp)) }
-                item { PlanesLista(datos.datosPlanes) }
-            }
+                item { PlanesLista(datos.datosPlanes, vistaDetalladaViewModel) }}
         }
     }
 
@@ -192,20 +196,56 @@ fun SeccionResumen(datosResumen: datosResumen) {
         }
     }
 }
-
 @Composable
-fun PlanesLista(planes: List<datosPlan>) {
+fun PlanesLista(
+    planes: List<datosPlan>,
+    vistaDetalladaViewModel: VistaDetalladaViewModel
+) {
     val context = LocalContext.current
 
     Column {
         planes.forEach { plan ->
             Box(
                 modifier = Modifier.clickable {
+                    // 1. Mostrar Toast (como ya lo tenías)
                     Toast.makeText(
                         context,
                         "ID del plan: ${plan.idPlan}",
                         Toast.LENGTH_SHORT
                     ).show()
+
+                    // 2. Nueva funcionalidad: Imprimir en consola
+                    vistaDetalladaViewModel.obtenerDetallesPlan(plan.idPlan) { datos ->
+                        println("═══════════════════════════════════")
+                        println("DATOS DETALLADOS DEL PLAN ${plan.idPlan}")
+                        println("ID: ${datos?.resumenPlan?.idPlan}")
+                        println("Título: ${datos?.resumenPlan?.tituloPlan}")
+                        println("Fecha: ${datos?.resumenPlan?.fechaPlan}")
+                        println("Estado: ${datos?.resumenPlan?.estadoPlan}")
+                        println("Avance: ${datos?.resumenPlan?.avancePlan}")
+                        println("Gasto total: ${datos?.resumenPlan?.gastoPlan}")
+                        println("Miembros: ${datos?.resumenPlan?.cantidadMiembrosPlan}")
+                        println("Actividades completadas: ${datos?.resumenPlan?.actividadesCompletadasPlan}")
+                        println("Deudas pendientes: ${datos?.resumenPlan?.cantidadDeudasPendientesPlan}")
+                        println("\n🔄 Actividades:")
+                        datos?.actividades?.forEach { actividad ->
+                            println("   • ID: ${actividad.idActividad}")
+                            println("   • Título: ${actividad.tituloActividad})")
+                            println("   • Monto: ${actividad.montoActividad}")
+                            println("   • Número de deudas: ${actividad.numeroDeudasPendientesActividad}")
+                            println("   • Estado: ${actividad.estadoActividad}")
+                        }
+                        println("\n👤 Miembros con deudas:")
+                        datos?.miembros?.forEach { miembro ->
+                            println("   • ID: ${miembro.idMiembro}")
+                            println("   • Nombre: ${miembro.nombreMiembro}")
+                            println("   • Celular: ${miembro.celularMiembro}")
+                            println("   • Monto de deuda: ${miembro.montoDeuda}")
+                            println("   • Monto de aportación: ${miembro.montoAportacion}")
+                            println("   • ¿Tiene deuda?: ${miembro.tieneDeuda}")
+                        }
+                        println("═══════════════════════════════════")
+                    }
                 }
             ) {
                 PlanesCard(

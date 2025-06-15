@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ezsoftware.ezplans.ui.components.Dashboard.ResumenCard
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 
 

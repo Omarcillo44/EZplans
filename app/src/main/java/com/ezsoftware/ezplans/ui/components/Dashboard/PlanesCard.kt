@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.ui.components
+package com.ezsoftware.ezplans.ui.components.Dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ezsoftware.ezplans.ui.components.Imagen
+import com.ezsoftware.ezplans.ui.components.Texto
+import com.ezsoftware.ezplans.ui.components.TextoPeq
 
 
 @Composable
