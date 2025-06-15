@@ -1,3 +1,5 @@
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -193,16 +195,28 @@ fun SeccionResumen(datosResumen: datosResumen) {
 
 @Composable
 fun PlanesLista(planes: List<datosPlan>) {
+    val context = LocalContext.current
+
     Column {
         planes.forEach { plan ->
-            PlanesCard(
-                titulo = plan.titulo,
-                fecha = plan.fecha,
-                gasto = plan.gastoTotal,
-                miembros = plan.numeroDeMiembros,
-                rol = plan.rolDelUsuario,
-                estado = plan.estadoDelPlan
-            )
+            Box(
+                modifier = Modifier.clickable {
+                    Toast.makeText(
+                        context,
+                        "ID del plan: ${plan.idPlan}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            ) {
+                PlanesCard(
+                    titulo = plan.titulo,
+                    fecha = plan.fecha,
+                    gasto = plan.gastoTotal,
+                    miembros = plan.numeroDeMiembros,
+                    rol = plan.rolDelUsuario,
+                    estado = plan.estadoDelPlan
+                )
+            }
             Spacer(modifier = Modifier.size(15.dp))
         }
     }
