@@ -33,9 +33,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ezsoftware.ezplans.models.DatosActividadPlan
+import com.ezsoftware.ezplans.models.DatosDeudasPorPlan
+import com.ezsoftware.ezplans.models.DatosResumenMiembrosPlan
 
 @Composable
-fun TabActividades(datos: List<Actividad>) {
+fun TabActividades(
+    datos: List<DatosActividadPlan>
+) {
     val filas = datos.chunked(2) // se ordenan en pares
 
     Column (verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -50,18 +55,18 @@ fun TabActividades(datos: List<Actividad>) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 CardTabActividad(
-                    titulo = fila[0].titulo,
-                    gasto = fila[0].gasto,
-                    miembros = fila[0].miembros,
-                    estado = fila[0].estado,
+                    titulo = fila[0].tituloActividad,
+                    gasto = fila[0].montoActividad,
+                    miembros = fila[0].numeroDeudasPendientesActividad,
+                    estado = fila[0].estadoActividad,
                     modifier = Modifier.weight(1f).fillMaxHeight() // se estira para ocupar la altura del Row
                 )
                 if (fila.size > 1) {
                     CardTabActividad(
-                        titulo = fila[1].titulo,
-                        gasto = fila[1].gasto,
-                        miembros = fila[1].miembros,
-                        estado = fila[1].estado,
+                        titulo = fila[1].tituloActividad,
+                        gasto = fila[1].montoActividad,
+                        miembros = fila[1].numeroDeudasPendientesActividad,
+                        estado = fila[1].estadoActividad,
                         modifier = Modifier.weight(1f).fillMaxHeight() // igual
                     )
                 } else {
@@ -74,33 +79,32 @@ fun TabActividades(datos: List<Actividad>) {
 }
 
 @Composable
-fun TabMiembros(datos: List<Miembro>) {
+fun TabMiembros(datos: List<DatosResumenMiembrosPlan>) {
     Column (verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 12.dp)
     ){
         datos.forEach { dato ->
-            CardTabMiembros(nombre = dato.nombre,
-                telefono = dato.telefono,
-                debe = dato.debe,
-                haber = dato.haPagado
+            CardTabMiembros(nombre = dato.nombreMiembro,
+                telefono = dato.celularMiembro,
+                debe = dato.montoDeuda,
+                haber = dato.montoAportacion
             )
         }
     }
 }
 
 @Composable
-fun TabDeudas(datos: List<Deuda>) {
+fun TabDeudas(datos: List<DatosDeudasPorPlan>) {
     Column (verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 12.dp)
     ){
         datos.forEach{ dato ->
-            CardTabDeudas(deudor = dato.deudor,
-                acreedor = dato.acreedor,
-                motivo = dato.motivo,
-                monto= dato.monto,
-                estado= dato.estado
+            CardTabDeudas(deudor = dato.nombreDeudor,
+                acreedor = dato.nombreAcreedor,
+                motivo = dato.tituloActividad,
+                monto= dato.montoDeuda,
             )
         }
     }
@@ -234,7 +238,6 @@ fun CardTabDeudas(
     acreedor: String,
     motivo: String,
     monto: String,
-    estado: String
 ){
     Card(
         modifier = Modifier
@@ -321,8 +324,6 @@ fun CardTabDeudas(
             ){
                 Row {
                     Texto(monto,true, MaterialTheme.colorScheme.error)
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Texto(estado, false)
                 }
                 Spacer(modifier = Modifier.size(5.dp))
                 Row {

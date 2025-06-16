@@ -21,6 +21,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,81 +31,55 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ezsoftware.ezplans.models.DatosActividadPlan
+import com.ezsoftware.ezplans.models.DatosDeudasPorPlan
+import com.ezsoftware.ezplans.models.DatosResumenMiembrosPlan
+import com.ezsoftware.ezplans.models.DatosResumenPlan
+import com.ezsoftware.ezplans.models.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.components.Dashboard.ResumenCard
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
-
-
-
-//------------------------------- para probar XD  -------------------------------//
-// Data class para los planes
-data class Actividad(
-    val titulo: String,
-    val gasto: String,
-    val miembros: String,
-    val estado: String
-)
-
-// Data class para los miembros
-data class Miembro(
-    val nombre: String,
-    val telefono: String,
-    val debe: String,
-    val haPagado: String
-)
-
-// Data class para las deudas
-data class Deuda(
-    val deudor: String,
-    val acreedor: String,
-    val motivo: String,
-    val monto: String,
-    val estado: String
-)
-
-//----------------- sustituir por la obtencion normal de datos ------------------//
-val actividades = listOf(
-    Actividad("Actividad absolutamente sana parte del plan sano", "$100000.00", "5 miembros", "pendiente"),
-    Actividad("Actividad", "$100000.00", "5 miembros", "pendiente"),
-    Actividad("Actividad absolutamente sano", "$100000.00", "5 miembros", "pendiente"),
-    Actividad("Actividad absolutamente sano", "$100000.00", "5 miembros", "pendiente"),
-    Actividad("Actividad absolutamente sano", "$100000.00", "5 miembros", "pendiente")
-)
-
-val miembros = listOf(
-    Miembro("Omar Lorenzo o no ekisde", "5555555555", "$100000.00", "$100000.00"),
-    Miembro("Omar Lorenzo", "5555555555", "$100000.00", "$100000.00"),
-    Miembro("Omar Lorenzo", "5555555555", "$100000.00", "$100000.00"),
-    Miembro("Omar Lorenzo", "5555555555", "$100000.00", "$100000.00"),
-    Miembro("Omar Lorenzo", "5555555555", "$100000.00", "$100000.00")
-)
-
-val deudas = listOf(
-    Deuda("Carlos López", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente"),
-    Deuda("Pus Yo", "Otro Yo", "Cena en restaurante", "$800", "Pendiente"),
-    Deuda("Maurisio Ekisde", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente"),
-    Deuda("Carlos López", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente"),
-    Deuda("Carlos López", "Juan Pérez", "Cena en restaurante", "$800", "Pendiente")
-)
-
-//-------------------------------    -------------------------------//
-
-
+import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
 
 @Composable
-fun VistaDetalladaPlan(navControlador: NavController, themeViewModel: ThemeViewModel){
-//fun VistaDetallada(){
+fun VistaDetalladaPlan(
+    navControlador: NavController,
+    themeViewModel: ThemeViewModel,
+    vistaDetalladaViewModel: VistaDetalladaViewModel,
+    idPlan: Int
+){
+    var datosVistaDetallada by remember { mutableStateOf<DatosVistaDetalladaPlan?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     var mostrarAyuda by remember { mutableStateOf(false) }
     var mostrarTema by remember { mutableStateOf(false) }
 
+    // Función para cargar datos
+    fun cargarDatos() {
+        idPlan?.let {
+            vistaDetalladaViewModel.obtenerDetallesPlan(
+                idPlan = it,
+                onSuccess = { datosVistaDetallada = it },
+                //onError = { errorMessage = it }
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        cargarDatos()
+    }
+
     Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
         LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-            item { TituloVistaDet() }
+            datosVistaDetallada?.let { datos ->
 
-            item { ProgressBar() }
+                item { ResumenPlan(datos.resumenPlan) }
 
-            item { ResumenDet() }
-
-            item { TabsPlan(actividades, miembros, deudas) }
+                item { TabsPlan(
+                    datos.actividades,
+                    datos.miembros,
+                    datos.deudas)
+                }
+            }
         }
     }
 
@@ -120,7 +95,29 @@ fun VistaDetalladaPlan(navControlador: NavController, themeViewModel: ThemeViewM
 }
 
 @Composable
-fun TituloVistaDet(){
+fun ResumenPlan(resumenPlan: DatosResumenPlan){
+    TituloVistaDet(
+        titulo = resumenPlan.tituloPlan,
+        fecha = resumenPlan.fechaPlan,
+        estado = resumenPlan.estadoPlan
+    )
+    ProgressBar(
+        avance = resumenPlan.avancePlan
+    )
+    ResumenDet(
+        gasto = resumenPlan.gastoPlan,
+        miembros = resumenPlan.cantidadMiembrosPlan,
+        actividades = resumenPlan.actividadesCompletadasPlan,
+        deudas = resumenPlan.cantidadDeudasPendientesPlan
+    )
+}
+
+@Composable
+fun TituloVistaDet(
+    titulo: String,
+    fecha: String,
+    estado: String
+){
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -130,7 +127,7 @@ fun TituloVistaDet(){
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.weight(1f)) {
-            SubTitulo("Salida sana a un lugar sano en condiciones sanas", true)
+            SubTitulo(titulo, true)
         }
         Column(
             modifier = Modifier
@@ -141,13 +138,13 @@ fun TituloVistaDet(){
             Row {
                 Imagen("placeholder", 20)
                 Spacer(modifier = Modifier.size(5.dp))
-                TextoPeq("10-06-05")
+                TextoPeq(fecha)
             }
             Spacer(modifier = Modifier.size(10.dp))
             Row {
                 Imagen("placeholder", 20)
                 Spacer(modifier = Modifier.size(5.dp))
-                TextoPeq("Pendiente")
+                TextoPeq(estado)
             }
         }
     }
@@ -161,11 +158,13 @@ fun TituloVistaDet(){
 }
 
 @Composable
-fun ProgressBar(){
-    SubTitulo("50% completado", false)
+fun ProgressBar(
+    avance: Double
+){
+    SubTitulo("$avance% completado", false)
     Spacer(modifier = Modifier.height(8.dp))
     LinearProgressIndicator(
-        progress = { 0.5f },
+        progress = { avance.toFloat()/100f },
         modifier = Modifier
             .fillMaxWidth()
             .height(12.dp),
@@ -174,7 +173,12 @@ fun ProgressBar(){
 }
 
 @Composable
-fun ResumenDet(){
+fun ResumenDet(
+    gasto: String,
+    miembros: String,
+    actividades: String,
+    deudas: Int
+){
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -183,12 +187,12 @@ fun ResumenDet(){
         ) {
             ResumenCard(
                 titulo = "Gato Total",
-                cantidad = "$100,000.0",
+                cantidad = gasto,
                 modifier = Modifier.weight(1f)
             )
             ResumenCard(
                 titulo = "Miembros",
-                cantidad = "6",
+                cantidad = miembros,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -199,12 +203,12 @@ fun ResumenDet(){
         ) {
             ResumenCard(
                 titulo = "Actividades",
-                cantidad = "2/4",
+                cantidad = actividades,
                 modifier = Modifier.weight(1f)
             )
             ResumenCard(
                 titulo = "Deudas pendientes",
-                cantidad = "3",
+                cantidad = deudas.toString(),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -213,7 +217,11 @@ fun ResumenDet(){
 }
 
 @Composable
-fun TabsPlan(actividades: List<Actividad>, miembros: List<Miembro>, deudas : List<Deuda>) {
+fun TabsPlan(
+    actividades: List<DatosActividadPlan>,
+    miembros: List<DatosResumenMiembrosPlan>,
+    deudas : List<DatosDeudasPorPlan>
+) {
     val tabs = listOf("Actividades", "Miembros", "Deudas")
     val selectedTab = rememberSaveable { mutableStateOf(0) }
 

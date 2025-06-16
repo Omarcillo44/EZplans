@@ -80,8 +80,9 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
         composable("UIPrincipal") {
             DashboardComponent(navControlador, themeViewModel, dashboardViewModel, vistaDetalladaViewModel)
         }
-        composable("VistaDetalladaPlan") {
-            VistaDetalladaPlan(navControlador, themeViewModel)
+        composable("VistaDetalladaPlan/{idPlan}") { backStackEntry ->
+            val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
+            VistaDetalladaPlan(navControlador, themeViewModel, vistaDetalladaViewModel, idPlan)
         }
     }
 }

@@ -87,7 +87,8 @@ fun DashboardComponent(
                 }
 
                 item { Spacer(modifier = Modifier.height(15.dp)) }
-                item { PlanesLista(datos.datosPlanes, vistaDetalladaViewModel) }}
+                item { PlanesLista(datos.datosPlanes, vistaDetalladaViewModel, navControlador) }
+            }
         }
     }
 
@@ -199,7 +200,8 @@ fun SeccionResumen(datosResumen: datosResumen) {
 @Composable
 fun PlanesLista(
     planes: List<datosPlan>,
-    vistaDetalladaViewModel: VistaDetalladaViewModel
+    vistaDetalladaViewModel: VistaDetalladaViewModel,
+    navControlador: NavController
 ) {
     val context = LocalContext.current
 
@@ -208,11 +210,7 @@ fun PlanesLista(
             Box(
                 modifier = Modifier.clickable {
                     // 1. Mostrar Toast (como ya lo tenías)
-                    Toast.makeText(
-                        context,
-                        "ID del plan: ${plan.idPlan}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    navControlador.navigate("VistaDetalladaPlan/${plan.idPlan}")
 
                     // 2. Nueva funcionalidad: Imprimir en consola
                     vistaDetalladaViewModel.obtenerDetallesPlan(plan.idPlan) { datos ->
