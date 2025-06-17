@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.ui.components.CrearNuevoPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
 import com.ezsoftware.ezplans.ui.components.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
@@ -83,6 +84,9 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
         composable("VistaDetalladaPlan/{idPlan}") { backStackEntry ->
             val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
             VistaDetalladaPlan(navControlador, themeViewModel, vistaDetalladaViewModel, idPlan)
+        }
+        composable("CrearNuevoPlan") {
+            CrearNuevoPlan(navControlador, themeViewModel)
         }
     }
 }

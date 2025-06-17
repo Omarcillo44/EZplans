@@ -50,8 +50,14 @@ fun LoginScreen(viewModel: AutenticacionViewModel, onLoginSuccess: () -> Unit) {
         }
 
         Spacer(modifier = Modifier.size(40.dp))
-        OutlinedTextForms(celular, "Celular", errorCel, 280, KeyboardType.Phone,
-            {
+        OutlinedTextForms(
+            valor = celular,
+            label= "Celular",
+            hayError = errorCel,
+            ancho= 280.dp,
+            tipoTeclado = KeyboardType.Phone,
+            singleLine = true,
+            onValorChange = {
                 if (it.length <= 10 && it.all { c -> c.isDigit() }) {
                     celular = it
                 }
@@ -60,8 +66,15 @@ fun LoginScreen(viewModel: AutenticacionViewModel, onLoginSuccess: () -> Unit) {
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextForms(pass, "Contraseña", errorPass, 280, KeyboardType.Password, PasswordVisualTransformation(),
-            {
+        OutlinedTextForms(
+            valor = pass,
+            label = "Contraseña",
+            hayError = errorPass,
+            ancho = 280.dp,
+            singleLine = true,
+            tipoTeclado = KeyboardType.Password,
+            transfVisual = PasswordVisualTransformation(),
+            onValorChange = {
                 pass = it
                 errorPass = false
             }
