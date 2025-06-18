@@ -14,9 +14,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
 
 @Composable
 fun TabInfoBasica(
@@ -33,11 +35,11 @@ fun TabInfoBasica(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 5.dp, vertical = 12.dp)
+            .padding(horizontal = 5.dp, vertical = 20.dp)
     ) {
         Titulo("Información Básica")
         TextoPeq("Información básica del plan")
-        Spacer(modifier = Modifier.size(12.dp))
+        Spacer(modifier = Modifier.size(25.dp))
 
         SubTitulo("Titulo del plan", false)
         OutlinedTextForms(
@@ -51,7 +53,7 @@ fun TabInfoBasica(
             }
         )
 
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(15.dp))
         SubTitulo("Fecha", false)
         DatePickerField(
             fechaTexto = fecha,
@@ -62,7 +64,7 @@ fun TabInfoBasica(
             }
         )
 
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(15.dp))
         SubTitulo("Detalles (Opcional)", false)
         OutlinedTextForms(
             valor = detalles,
@@ -81,37 +83,36 @@ fun TabInfoBasica(
 
 @Composable
 fun TabParticipantes(
-    usuariosSelect: List<Int>,
+    usuariosDefault: List<UsuarioRegistrado>,
+    unUariosSelect: List<Int>,
     onUsuariosSelectChange: (List<Int>) -> Unit
 ) {
     Column (
         modifier = Modifier
-            .padding(horizontal = 5.dp, vertical = 12.dp)
+            .padding(horizontal = 5.dp, vertical = 20.dp)
     ){
         Titulo("Participantes")
         TextoPeq("Selecciona los participantes de este plan")
-        Spacer(modifier = Modifier.size(12.dp))
+        Spacer(modifier = Modifier.size(25.dp))
 
         SubTitulo("Seleccionar Participantes", false)
         Spacer(modifier = Modifier.size(10.dp))
-
         Column (
             verticalArrangement = Arrangement.spacedBy(18.dp),
             modifier = Modifier
                 .padding(horizontal = 5.dp, vertical = 6.dp)
         ) {
-            listaUsuarios.forEach { usuario ->
-                val isSelected = usuario.id in usuariosSelect
+            usuariosDefault.forEach { usuario ->
                 CardUsuariosDisp(
-                    nombre = usuario.nombre,
-                    telefono = usuario.telefono,
-                    checked = usuario.id in usuariosSelect,
+                    nombre = "${usuario.nombre_usuario} ${usuario.apellidos_usuario}",
+                    telefono = usuario.celular_usuario,
+                    checked = usuario.id_usuario in unUariosSelect,
                     onCheckedChange = { checked ->
                         onUsuariosSelectChange(
                             if (checked) {
-                                usuariosSelect + usuario.id
+                                unUariosSelect + usuario.id_usuario
                             } else {
-                                usuariosSelect - usuario.id
+                                unUariosSelect - usuario.id_usuario
                             }
                         )
                     }

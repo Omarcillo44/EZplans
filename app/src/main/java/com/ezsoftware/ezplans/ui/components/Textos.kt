@@ -5,7 +5,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Modifier
 
 @Composable
 fun Titulo(
@@ -35,50 +37,34 @@ fun SubTitulo(
 @Composable
 fun Texto(
     texto: String,
-    bold: Boolean
-){
+    bold: Boolean = false,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null
+) {
     Text(
         text = texto,
         fontSize = 18.sp,
         fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
-        color = MaterialTheme.colorScheme.onSurface
-    )
-}
-
-@Composable
-fun Texto(
-    texto: String,
-    bold: Boolean,
-    color: Color
-){
-    Text(
-        text = texto,
-        fontSize = 18.sp,
-        fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
-        color = color
-    )
-}
-
-@Composable
-fun TextoPeq(
-    texto: String
-){
-    Text(
-        text = texto,
-        fontSize = 16.sp,
-        color = MaterialTheme.colorScheme.onSurface
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign
     )
 }
 
 @Composable
 fun TextoPeq(
     texto: String,
-    color: Color
-){
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null
+) {
     Text(
         text = texto,
-        fontSize = 16.sp,
-        color = color
+        fontSize = 14.sp,
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign
     )
 }
 

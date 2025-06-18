@@ -1,6 +1,6 @@
 package com.ezsoftware.ezplans.ui.components
 
-import android.util.Log
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,11 +19,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,24 +35,31 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import com.ezsoftware.ezplans.models.NuevoPlan.DatosMiembrosNuevoPlan
-import com.ezsoftware.ezplans.models.NuevoPlan.DatosNuevoPlan
-import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
 import com.ezsoftware.ezplans.preferences.obtenerUsuariosDefault
-import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
-import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
+
+
+//############ sustituir por obtencion de usuarios real ############
+data class UsuariosActividad(
+    val id: Int,
+    val nombre: String,
+    val telefono: String
+)
+
+val listUsuActiv = listOf(
+    UsuariosActividad(1,"Ana López", "555-1234"),
+    UsuariosActividad(2,"Carlos Ruiz", "555-5678"),
+    UsuariosActividad(3,"Luisa Martínez", "555-9876"),
+    UsuariosActividad(4,"Luisa Martínez", "555-9876")
+)
+// ################################################################
 
 @Composable
-fun CrearNuevoPlan(
-    navControlador: NavController,
-    themeViewModel: ThemeViewModel,
-    nuevoPlanViewModel: NuevoPlanViewModel
-){
+fun CrearNuevaActividad(navControlador: NavController, themeViewModel: ThemeViewModel,){
     val context = LocalContext.current
     val usuariosDefault = remember { obtenerUsuariosDefault(context) }
-    val idUsuario = PreferenceHelper(context).leerIDUsuario()
 
     var mostrarAyuda by remember { mutableStateOf(false) }
     var mostrarTema by remember { mutableStateOf(false) }
@@ -60,51 +67,48 @@ fun CrearNuevoPlan(
     var errorTitulo by rememberSaveable { mutableStateOf(false) }
     var titulo by rememberSaveable { mutableStateOf("") }
     var detalles by rememberSaveable { mutableStateOf("") }
-    var errorFecha by rememberSaveable { mutableStateOf(false) }
-    var fecha by rememberSaveable { mutableStateOf("") }
     var usuariosSelect by rememberSaveable { mutableStateOf(listOf<Int>()) }
+    var nombreUsuSelect by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var divicionIgual by remember { mutableStateOf(true) }
+    var gastoTotal by remember { mutableStateOf(0) }
 
     var selectedTab = rememberSaveable { mutableStateOf(0) }
 
     Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
         LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
 
-            item { TituloNuevoPlan(navControlador) }
+            item { TituloNuevaActividad(navControlador) }
 
             item {
-                TabsNuevoPlan(
+                TabsNuevaActividad(
                     usuariosDefault = usuariosDefault,
                     titulo = titulo,
                     errorTitulo = errorTitulo,
-                    fecha = fecha,
-                    errorFecha = errorFecha,
                     detalles = detalles,
                     usuariosSelect = usuariosSelect,
+                    nombreUsuSelect = nombreUsuSelect,
+                    divicionIgual = divicionIgual,
+                    gastoTotal = gastoTotal,
                     selectedTab = selectedTab,
                     onTituloCambio = { titulo = it },
-                    onFechaCambio = { fecha = it },
                     onDetalleCambio = { detalles = it },
                     onUsuariosSelectChange = { usuariosSelect = it },
                     onErrorTituloCambio = { errorTitulo = it },
-                    onErrorFechaCambio = { errorFecha = it },
+                    onDivicionIgual = { divicionIgual = it },
+                    onNombreUsuSelect = { nombreUsuSelect = it }
                 )
             }
 
             item {
-                idUsuario?.let {
-                    BotonesNuevoPlan(
-                        navControlador = navControlador,
-                        nuevoPlanViewModel = nuevoPlanViewModel,
-                        idUsuario = it,
-                        titulo = titulo,
-                        fecha = fecha,
-                        detalles = detalles,
-                        usuariosSelect = usuariosSelect,
-                        selectedTab = selectedTab,
-                        onErrorTituloCambio = { errorTitulo = it },
-                        onErrorFechaCambio = { errorFecha = it },
-                    )
-                }
+                BotonesNuevaActividad(
+                    navControlador = navControlador,
+                    titulo = titulo,
+                    detalles = detalles,
+                    usuariosSelect = usuariosSelect,
+                    divicionIgual = divicionIgual,
+                    selectedTab = selectedTab,
+                    nombreUsuSelect = nombreUsuSelect
+                )
             }
         }
     }
@@ -119,7 +123,7 @@ fun CrearNuevoPlan(
 }
 
 @Composable
-fun TituloNuevoPlan(navControlador: NavController){
+fun TituloNuevaActividad(navControlador: NavController){
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +136,7 @@ fun TituloNuevoPlan(navControlador: NavController){
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ){
-            Titulo("Nuevo plan")
+            Titulo("Nueva Actividad")
             IconButton(
                 onClick = { navControlador.navigate("UIPrincipal") },
                 modifier = Modifier.size(50.dp)
@@ -140,8 +144,7 @@ fun TituloNuevoPlan(navControlador: NavController){
                 Icon(imageVector = Icons.Default.Close, "Cerrar")
             }
         }
-        Texto("Completa la información para crear un nuevo plan." +
-                "Podrás añadir actividades después.", false)
+        Texto("Completa la información para crear una nueva actividad", false)
     }
     HorizontalDivider(
         thickness = 2.dp,
@@ -152,70 +155,97 @@ fun TituloNuevoPlan(navControlador: NavController){
 }
 
 @Composable
-fun TabsNuevoPlan(
+fun TabsNuevaActividad(
     usuariosDefault: List<UsuarioRegistrado>,
     titulo: String,
     errorTitulo: Boolean,
-    fecha: String,
-    errorFecha: Boolean,
     detalles: String,
     usuariosSelect: List<Int>,
+    nombreUsuSelect: List<String>,
+    divicionIgual: Boolean,
+    gastoTotal: Int,
     selectedTab: MutableState<Int>,
     onTituloCambio: (String) -> Unit,
-    onFechaCambio: (String) -> Unit,
     onDetalleCambio: (String) -> Unit,
     onUsuariosSelectChange: (List<Int>) -> Unit,
     onErrorTituloCambio: (Boolean) -> Unit,
-    onErrorFechaCambio: (Boolean) -> Unit
+    onDivicionIgual: (Boolean) -> Unit,
+    onNombreUsuSelect: (List<String>) -> Unit
 ) {
-    val tabs = listOf("Información básica", "Participantes")
+    val tabs = listOf("Información básica", "Participantes", "Contribuciones", "Resumen de deudas")
 
-    Column {
-        TabRow(selectedTabIndex = selectedTab.value) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab.value == index,
-                    onClick = { selectedTab.value = index },
-                    enabled = false,
-                    text = { Text(text = title) },
-                )
+    Column (
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ){
+        val configuration = LocalConfiguration.current
+        val esHorizontal = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        if(esHorizontal){
+            TabRow(
+                selectedTabIndex = selectedTab.value,
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab.value == index,
+                        onClick = { selectedTab.value = index },
+                        enabled = false,
+                        text = { Text(text = title) }
+                    )
+                }
+            }
+        }else{
+            ScrollableTabRow(
+                selectedTabIndex = selectedTab.value,
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab.value == index,
+                        onClick = { selectedTab.value = index },
+                        enabled = false,
+                        text = { Text(text = title) }
+                    )
+                }
             }
         }
-        // Contenido para cada tab
         when (selectedTab.value) {
-            0 -> TabInfoBasica(
+            0 -> TabInfoBasicaActiv(
                 titulo = titulo,
                 errorTitulo = errorTitulo,
-                fecha = fecha,
-                errorFecha = errorFecha,
                 detalles = detalles,
                 onTituloCambio = { onTituloCambio(it) },
-                onFechaCambio = { onFechaCambio(it) },
                 onDetalleCambio = { onDetalleCambio(it) },
-                onErrorTituloCambio = { onErrorTituloCambio(it) },
-                onErrorFechaCambio = { onErrorFechaCambio(it) }
+                onErrorTituloCambio = { onErrorTituloCambio(it) }
             )
-            1 -> TabParticipantes(
+            1 -> TabParticipantesActiv(
                 usuariosDefault = usuariosDefault,
-                unUariosSelect = usuariosSelect,
-                onUsuariosSelectChange = onUsuariosSelectChange
+                usuariosSelect = usuariosSelect,
+                onUsuariosSelectChange = onUsuariosSelectChange,
+                divicionIgual = divicionIgual,
+                onDivicionIgual = onDivicionIgual,
+                nombreUsuSelect = nombreUsuSelect,
+                onNombreUsuSelect = onNombreUsuSelect
             )
+            2 -> TabContribuciones(
+                gastoTotal = gastoTotal,
+                usuariosSelect = usuariosSelect,
+                nombreUsuSelect = nombreUsuSelect
+            )
+            3 -> TabResumenDeudas()
         }
     }
 }
 
+
 @Composable
-fun BotonesNuevoPlan(
+fun BotonesNuevaActividad(
     navControlador: NavController,
-    nuevoPlanViewModel: NuevoPlanViewModel,
-    idUsuario: Int,
     titulo: String,
-    fecha: String,
     detalles: String,
     usuariosSelect: List<Int>,
+    divicionIgual: Boolean,
     selectedTab: MutableState<Int>,
-    onErrorTituloCambio: (Boolean) -> Unit,
-    onErrorFechaCambio: (Boolean) -> Unit
+    nombreUsuSelect: List<String>,
 ) {
     HorizontalDivider(
         thickness = 2.dp,
@@ -231,15 +261,15 @@ fun BotonesNuevoPlan(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val textoBotonIzq = if (selectedTab.value == 1) "Anterior" else "Cancelar"
-        val textoBotonDer = if (selectedTab.value == 1) "Crear Plan" else "Continuar"
+        val textoBotonIzq = if (selectedTab.value == 0) "Cancelar" else "Anterior"
+        val textoBotonDer = if (selectedTab.value == 3) "Crear Actividad" else "Continuar"
 
         ButtonForms(
             texto = textoBotonIzq,
             onClick = {
-                if (selectedTab.value == 1) { // tal de participantes (ultima)
+                if (selectedTab.value != 0) {
                     selectedTab.value -= 1
-                } else { // tab de informacion basica (primera)
+                } else if (selectedTab.value == 0){
                     navControlador.navigate("UIPrincipal")
                 }
             }
@@ -251,48 +281,19 @@ fun BotonesNuevoPlan(
             onClick = {
                 when (selectedTab.value) {
                     0 -> {
-                        if (titulo.isBlank()) {
-                            Toast.makeText(context, "Debe ingresar un título", Toast.LENGTH_SHORT).show()
-                            onErrorTituloCambio(true)
-                        } else if (fecha.isBlank()) {
-                            Toast.makeText(context, "Debe seleccionar una fecha", Toast.LENGTH_SHORT).show()
-                            onErrorFechaCambio(true)
-                        } else {
+                        Toast.makeText(context, "$titulo, $detalles", Toast.LENGTH_SHORT).show()
                             selectedTab.value += 1
-                        }
                     }
                     1 -> {
-                        if (usuariosSelect.isEmpty()) {
-                            Toast.makeText(context, "Debe seleccionar al menos un participante", Toast.LENGTH_SHORT).show()
-                        } else {
-                            val miembros = buildList {
-                                add(DatosMiembrosNuevoPlan(idUsuario = idUsuario, administrador = true)) // agregas al admin
-                                addAll(usuariosSelect.map { id ->
-                                    DatosMiembrosNuevoPlan(idUsuario = id, administrador = false)
-                                })
-                            }
-                            val datosNuevoPlan = DatosNuevoPlan(
-                                titulo = titulo.trim(),
-                                fechaPlan = fecha,
-                                detallesPlan = detalles.trim(),
-                                miembros = miembros
-                            )
-                            nuevoPlanViewModel.limpiarEstados()
-                            nuevoPlanViewModel.validarDatosPlan(datosNuevoPlan)
-                            nuevoPlanViewModel.crearNuevoPlan(
-                                datosPlan = datosNuevoPlan,
-                                onSuccess = { mensaje ->
-                                    Log.d("Plan", "Éxito: $mensaje")
-                                    // desspues de el proceso de crear el plan se regresa la ventana principal
-                                    Toast.makeText(context, "Plan creado correctamente", Toast.LENGTH_SHORT).show()
-                                    navControlador.navigate("UIPrincipal")
-                                },
-                                onError = { error ->
-                                    Log.e("Plan", "Error: $error")
-                                    Toast.makeText(context, "Plan creado incorrectamente. Intentelo nuevamente.", Toast.LENGTH_SHORT).show()
-                                }
-                            )
-                        }
+                        Toast.makeText(context, "$usuariosSelect, $divicionIgual, $nombreUsuSelect", Toast.LENGTH_SHORT).show()
+                        selectedTab.value += 1
+                    }
+                    2 -> {
+                        selectedTab.value += 1
+                    }
+                    3 -> {
+                        Toast.makeText(context, "Plan creado correctamente", Toast.LENGTH_SHORT).show()
+                        navControlador.navigate("UIPrincipal")
                     }
                 }
             }

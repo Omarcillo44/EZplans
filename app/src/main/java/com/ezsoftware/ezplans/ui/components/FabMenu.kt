@@ -65,19 +65,15 @@ fun MenuFab(
             horizontalAlignment = Alignment.End,
         ) {
             if (isFabExpanded) {
-                val menuOptions = listOf("Tema", "Ayuda", "Ver planes", "Crear nuevo plan")
+                val menuOptions = listOf("Tema", "Ayuda", "Crear nuevo plan")
 
                 menuOptions.forEach { option ->
                     ExtendedFloatingActionButton(
                         onClick = {
                             when (option) {
-                                "Ver planes" -> {
-                                    isFabExpanded = false
-                                    //navController.navigate("")
-                                }
                                 "Crear nuevo plan" -> {
                                     isFabExpanded = false
-                                    //navController.navigate("")
+                                    navController.navigate("CrearNuevoPlan")
                                 }
                                 "Ayuda" -> {
                                     isFabExpanded = false

@@ -1,5 +1,6 @@
 package com.ezsoftware.ezplans
 
+import android.content.Context
 import com.ezsoftware.ezplans.ui.components.Dashboard.DashboardComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,14 +18,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
 import com.ezsoftware.ezplans.ui.components.CrearNuevoPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
 import com.ezsoftware.ezplans.ui.components.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
+import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
 
@@ -74,6 +78,7 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
     val navControlador = rememberNavController()
     val dashboardViewModel: DashboardViewModel = viewModel()
     val vistaDetalladaViewModel: VistaDetalladaViewModel = viewModel()
+    val nuevoPlanViewModel: NuevoPlanViewModel = viewModel()
 
 
     /*Avísame mañana que hay que cambiar el start destination, ya iba a matar toda esta parte*/
@@ -85,8 +90,11 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
             val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
             VistaDetalladaPlan(navControlador, themeViewModel, vistaDetalladaViewModel, idPlan)
         }
-        composable("CrearNuevoPlan") {
-            CrearNuevoPlan(navControlador, themeViewModel)
+        composable("CrearNuevoPlan") { backStackEntry ->
+            CrearNuevoPlan(navControlador, themeViewModel, nuevoPlanViewModel)
+        }
+        composable("CrearNuevaActividad") {
+            CrearNuevaActividad(navControlador, themeViewModel)
         }
     }
 }
