@@ -1,6 +1,7 @@
 package com.ezsoftware.ezplans.network
 
-import com.ezsoftware.ezplans.models.DatosVistaDetalladaPlan
+import com.ezsoftware.ezplans.models.DatosNuevoPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.models.acceso.AccesoRequest
 import com.ezsoftware.ezplans.models.acceso.AccesoResponse
 import com.ezsoftware.ezplans.models.dashboard.datosDashboard
@@ -37,4 +38,11 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<DatosVistaDetalladaPlan>
 
+    // Agrega este método a tu interfaz ApiService existente
+
+    @POST("/planes/nuevo_plan")
+    suspend fun crearNuevoPlan(
+        @Body datosPlan: DatosNuevoPlan,
+        @Header("Authorization") token: String
+    ): Response<String>
 }

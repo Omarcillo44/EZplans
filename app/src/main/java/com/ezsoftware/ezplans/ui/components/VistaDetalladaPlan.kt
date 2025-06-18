@@ -31,11 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.ezsoftware.ezplans.models.DatosActividadPlan
-import com.ezsoftware.ezplans.models.DatosDeudasPorPlan
-import com.ezsoftware.ezplans.models.DatosResumenMiembrosPlan
-import com.ezsoftware.ezplans.models.DatosResumenPlan
-import com.ezsoftware.ezplans.models.DatosVistaDetalladaPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosActividadPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosDeudasPorPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenMiembrosPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.components.Dashboard.ResumenCard
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel

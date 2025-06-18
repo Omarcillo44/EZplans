@@ -33,9 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ezsoftware.ezplans.models.DatosActividadPlan
-import com.ezsoftware.ezplans.models.DatosDeudasPorPlan
-import com.ezsoftware.ezplans.models.DatosResumenMiembrosPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosActividadPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosDeudasPorPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenMiembrosPlan
 
 @Composable
 fun TabActividades(

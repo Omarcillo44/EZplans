@@ -6,7 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ezsoftware.ezplans.models.DatosVistaDetalladaPlan
+import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.network.ApiService
 import com.ezsoftware.ezplans.network.RetrofitInstance
 import com.ezsoftware.ezplans.preferences.PreferenceHelper

@@ -89,8 +89,8 @@ fun LoginScreen(viewModel: AutenticacionViewModel, onLoginSuccess: () -> Unit) {
                 errorPass = true
                 error = null
             }else {
-                //viewModel.login(celular, pass,
-                viewModel.login("5561397608", "contraseña",
+                viewModel.login(celular, pass,
+                //viewModel.login("5561397608", "contraseña",
                     onSuccess = { onLoginSuccess() },
                     onError = { error = it }
                 )

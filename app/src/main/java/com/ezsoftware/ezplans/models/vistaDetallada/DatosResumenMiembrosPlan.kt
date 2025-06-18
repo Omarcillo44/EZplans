@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.models
+package com.ezsoftware.ezplans.models.vistaDetallada
 
 data class DatosResumenMiembrosPlan(
     val idMiembro: Int,
