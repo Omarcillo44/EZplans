@@ -1,5 +1,5 @@
 // RespuestaNuevaActividad.kt
-package com.ezsoftware.ezplans.models
+package com.ezsoftware.ezplans.models.NuevaActividad
 
 import android.util.Log
 

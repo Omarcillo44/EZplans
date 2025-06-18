@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.models
+package com.ezsoftware.ezplans.models.Pagos
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal

@@ -6,8 +6,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ezsoftware.ezplans.models.DatosNuevaActividad
-import com.ezsoftware.ezplans.models.RespuestaNuevaActividad
+import com.ezsoftware.ezplans.models.NuevaActividad.DatosNuevaActividad
+import com.ezsoftware.ezplans.models.NuevaActividad.RespuestaNuevaActividad
 import com.ezsoftware.ezplans.network.ApiService
 import com.ezsoftware.ezplans.network.RetrofitInstance
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
