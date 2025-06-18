@@ -33,6 +33,7 @@ class NuevoPlanViewModel(application: Application) : AndroidViewModel(applicatio
     private val _planCreated = mutableStateOf(false)
     val planCreated: State<Boolean> = _planCreated
 
+    // Actualización del método crearNuevoPlan en tu ViewModel
     fun crearNuevoPlan(
         datosPlan: DatosNuevoPlan,
         onSuccess: (String) -> Unit = {},
@@ -40,7 +41,7 @@ class NuevoPlanViewModel(application: Application) : AndroidViewModel(applicatio
     ) {
         Log.d(TAG, "Iniciando creación de nuevo plan")
         Log.d(TAG, "Datos del plan a enviar: $datosPlan")
-        
+
         _isLoading.value = true
         _errorMessage.value = null
         _successMessage.value = null
@@ -59,14 +60,6 @@ class NuevoPlanViewModel(application: Application) : AndroidViewModel(applicatio
                 Log.d(TAG, "Token obtenido exitosamente")
 
                 Log.d(TAG, "Enviando petición POST a /planes/nuevo_plan")
-                Log.d(TAG, "Título: ${datosPlan.titulo}")
-                Log.d(TAG, "Fecha: ${datosPlan.fechaPlan}")
-                Log.d(TAG, "Detalles: ${datosPlan.detallesPlan}")
-                Log.d(TAG, "Cantidad de miembros: ${datosPlan.miembros.size}")
-                
-                datosPlan.miembros.forEachIndexed { index, miembro ->
-                    Log.d(TAG, "Miembro $index: ID=${miembro.idUsuario}, Admin=${miembro.administrador}")
-                }
 
                 val response = apiService.crearNuevoPlan(
                     datosPlan = datosPlan,
@@ -77,19 +70,25 @@ class NuevoPlanViewModel(application: Application) : AndroidViewModel(applicatio
                 Log.d(TAG, "Respuesta recibida - Mensaje: ${response.message()}")
 
                 if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    Log.d(TAG, "Plan creado exitosamente: $responseBody")
-                    
-                    _successMessage.value = responseBody ?: "Plan creado exitosamente"
+                    // Manejar ResponseBody
+                    val responseText = if (response.body() != null) {
+                        response.body()!!.string() // Para ResponseBody
+                    } else {
+                        "Plan creado exitosamente"
+                    }
+
+                    Log.d(TAG, "Plan creado exitosamente: $responseText")
+
+                    _successMessage.value = responseText
                     _planCreated.value = true
-                    
-                    onSuccess(responseBody ?: "Plan creado exitosamente")
+
+                    onSuccess(responseText)
                 } else {
                     val errorBody = response.errorBody()?.string()
                     val errorMsg = "Error ${response.code()}: ${response.message()}"
                     Log.e(TAG, "Error en la respuesta: $errorMsg")
                     Log.e(TAG, "Error body: $errorBody")
-                    
+
                     _errorMessage.value = errorMsg
                     onError(errorMsg)
                 }
@@ -97,7 +96,7 @@ class NuevoPlanViewModel(application: Application) : AndroidViewModel(applicatio
                 val errorMsg = "Error de conexión: ${e.localizedMessage}"
                 Log.e(TAG, "Excepción durante la creación del plan: $errorMsg")
                 Log.e(TAG, "Stack trace: ${e.stackTraceToString()}")
-                
+
                 _errorMessage.value = errorMsg
                 onError(errorMsg)
             } finally {

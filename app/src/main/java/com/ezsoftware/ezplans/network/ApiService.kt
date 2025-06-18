@@ -9,6 +9,7 @@ import com.ezsoftware.ezplans.models.acceso.AccesoRequest
 import com.ezsoftware.ezplans.models.acceso.AccesoResponse
 import com.ezsoftware.ezplans.models.dashboard.datosDashboard
 import com.ezsoftware.ezplans.models.user.DatosUsuarioResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -40,11 +41,11 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<DatosVistaDetalladaPlan>
 
-    @POST("/planes/nuevo_plan")
+    @POST("planes/nuevo_plan")
     suspend fun crearNuevoPlan(
         @Body datosPlan: DatosNuevoPlan,
         @Header("Authorization") token: String
-    ): Response<String>
+    ): Response<ResponseBody> // Usar ResponseBody para respuesta cruda
 
     @GET("/planes/miembros")
     suspend fun obtenerMiembrosPlan(
