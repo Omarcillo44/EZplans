@@ -1,6 +1,7 @@
 package com.ezsoftware.ezplans.network
 
 import com.ezsoftware.ezplans.models.DatosNuevoPlan
+import com.ezsoftware.ezplans.models.DatosUsuarioEnPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.models.acceso.AccesoRequest
 import com.ezsoftware.ezplans.models.acceso.AccesoResponse
@@ -45,4 +46,12 @@ interface ApiService {
         @Body datosPlan: DatosNuevoPlan,
         @Header("Authorization") token: String
     ): Response<String>
+
+    // Agrega este método a tu interfaz ApiService existente
+
+    @GET("/planes/miembros")
+    suspend fun obtenerMiembrosPlan(
+        @Query("idPlan") idPlan: Int,
+        @Header("Authorization") token: String
+    ): Response<List<DatosUsuarioEnPlan>>
 }
