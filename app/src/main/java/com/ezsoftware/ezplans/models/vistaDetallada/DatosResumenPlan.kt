@@ -8,5 +8,6 @@ data class DatosResumenPlan(
     val gastoPlan: String,
     val cantidadMiembrosPlan: String,
     val actividadesCompletadasPlan: String,
-    val cantidadDeudasPendientesPlan: Int
+    val cantidadDeudasPendientesPlan: Int,
+    val idAdministrador: Int
 )
