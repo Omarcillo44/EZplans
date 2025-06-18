@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.models
+package com.ezsoftware.ezplans.models.NuevoPlan
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

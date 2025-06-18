@@ -1,7 +1,9 @@
 package com.ezsoftware.ezplans.network
 
-import com.ezsoftware.ezplans.models.DatosNuevoPlan
-import com.ezsoftware.ezplans.models.DatosUsuarioEnPlan
+import com.ezsoftware.ezplans.models.DatosNuevaActividad
+import com.ezsoftware.ezplans.models.DatosNuevoPago
+import com.ezsoftware.ezplans.models.NuevoPlan.DatosNuevoPlan
+import com.ezsoftware.ezplans.models.NuevaActividad.Miembros.DatosUsuarioEnPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.models.acceso.AccesoRequest
 import com.ezsoftware.ezplans.models.acceso.AccesoResponse
@@ -32,14 +34,11 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<datosDashboard>
 
-
     @GET("/planes/vista_detallada")
     suspend fun obtenerVistaDetalladaPlan(
         @Query("idPlan") idPlan: Int,
         @Header("Authorization") token: String
     ): Response<DatosVistaDetalladaPlan>
-
-    // Agrega este método a tu interfaz ApiService existente
 
     @POST("/planes/nuevo_plan")
     suspend fun crearNuevoPlan(
@@ -47,11 +46,21 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<String>
 
-    // Agrega este método a tu interfaz ApiService existente
-
     @GET("/planes/miembros")
     suspend fun obtenerMiembrosPlan(
         @Query("idPlan") idPlan: Int,
         @Header("Authorization") token: String
     ): Response<List<DatosUsuarioEnPlan>>
+
+    @POST("/pagos/nuevo_pago")
+    suspend fun registrarNuevoPago(
+        @Body datosPago: DatosNuevoPago,
+        @Header("Authorization") token: String
+    ): Response<String>
+
+    @POST("/actividades/nueva_actividad")
+    suspend fun crearNuevaActividad(
+        @Body datosActividad: DatosNuevaActividad,
+        @Header("Authorization") token: String
+    ): Response<String>
 }
