@@ -87,5 +87,5 @@ interface ApiService {
     suspend fun actualizarPlan(
         @Body datosPlan: DatosEditarPlan,
         @Header("Authorization") token: String
-    ): Response<String>
+    ): Response<ResponseBody>
 }

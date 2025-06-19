@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
@@ -25,6 +26,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -47,73 +50,107 @@ import androidx.navigation.NavController
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 
+// Clase de datos para definir opciones del menú
+data class MenuOption(
+    val id: String,
+    val texto: String,
+    val icono: ImageVector,
+    val onClick: () -> Unit
+)
+
+// Clase abstracta para configurar diferentes tipos de menú
+abstract class MenuConfiguration {
+    abstract fun getMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        parameters: Map<String, Any?> = emptyMap()
+    ): List<MenuOption>
+
+    abstract fun getHelpContent(): @Composable () -> Unit
+
+    // Método que siempre incluye la opción de tema
+    fun getCompleteMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        onTemaClick: () -> Unit,
+        parameters: Map<String, Any?> = emptyMap()
+    ): List<MenuOption> {
+        val customOptions = getMenuOptions(navController, onClose, parameters)
+        val temaOption = MenuOption(
+            id = "tema",
+            texto = "Tema",
+            icono = Icons.Default.Build,
+            onClick = {
+                onTemaClick()
+                onClose()
+            }
+        )
+        return customOptions + temaOption
+    }
+}
+
+// Componente principal del menú FAB refactorizado
 @Composable
 fun MenuFab(
     navController: NavController,
-    onAyudaClick: () -> Unit,
-    onTemaClick: () -> Unit
+    themeViewModel: ThemeViewModel,
+    menuConfig: MenuConfiguration,
+    parameters: Map<String, Any?> = emptyMap()
 ) {
-    var isFabExpanded by remember { mutableStateOf(false) }
+    var mostrarAyuda by remember { mutableStateOf(false) }
+    var mostrarTema by remember { mutableStateOf(false) }
+
+    MenuFabCirculo { onClose ->
+        MenuOpciones(
+            menuConfig = menuConfig,
+            navController = navController,
+            onClose = onClose,
+            onAyudaClick = { mostrarAyuda = true },
+            onTemaClick = { mostrarTema = true },
+            parameters = parameters
+        )
+    }
+
+    if (mostrarAyuda) {
+        DialogoAyuda(
+            onClose = { mostrarAyuda = false },
+            content = menuConfig.getHelpContent()
+        )
+    }
+
+    if (mostrarTema) {
+        DialogoTema(
+            onClose = { mostrarTema = false },
+            themeViewModel = themeViewModel
+        )
+    }
+}
+
+@Composable
+fun MenuFabCirculo(
+    content: @Composable (onClose: () -> Unit) -> Unit
+) {
+    var isExpanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 80.dp, end = 25.dp),
+            .padding(bottom = 75.dp, end = 25.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
-        Column(
-            horizontalAlignment = Alignment.End,
-        ) {
-            if (isFabExpanded) {
-                val menuOptions = listOf("Tema", "Ayuda", "Crear nuevo plan")
-
-                menuOptions.forEach { option ->
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            when (option) {
-                                "Crear nuevo plan" -> {
-                                    isFabExpanded = false
-                                    navController.navigate("CrearNuevoPlan")
-                                }
-                                "Ayuda" -> {
-                                    isFabExpanded = false
-                                    onAyudaClick()
-                                }
-                                "Tema" -> {
-                                    isFabExpanded = false
-                                    onTemaClick()
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(bottom = 8.dp)
-                            .widthIn(min = 150.dp),
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    ) {
-                        Icon(
-                            imageVector = when (option) {
-                                "Ayuda" -> Icons.Default.Info
-                                "Tema" -> Icons.Default.Build
-                                else -> Icons.Default.MoreVert
-                            },
-                            contentDescription = option
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(option)
-                    }
-                }
+        Column(horizontalAlignment = Alignment.End) {
+            if (isExpanded) {
+                content { isExpanded = false }
             }
-
             FloatingActionButton(
-                onClick = { isFabExpanded = !isFabExpanded },
+                onClick = { isExpanded = !isExpanded },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
             ) {
                 Icon(
-                    imageVector = if (isFabExpanded) Icons.Default.Close else Icons.Default.Add,
-                    contentDescription = if (isFabExpanded) "Cerrar menú" else "Abrir menú"
+                    imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Menu,
+                    contentDescription = if (isExpanded) "Cerrar menú" else "Abrir menú"
                 )
             }
         }
@@ -121,78 +158,65 @@ fun MenuFab(
 }
 
 @Composable
-fun MiniFabConTexto(
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
+fun MenuOpciones(
+    menuConfig: MenuConfiguration,
+    navController: NavController,
+    onClose: () -> Unit,
+    onAyudaClick: () -> Unit,
+    onTemaClick: () -> Unit,
+    parameters: Map<String, Any?> = emptyMap()
 ) {
-    Surface(
-        shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.secondary,
-        shadowElevation = 6.dp,
-        onClick = onClick
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = MaterialTheme.colorScheme.onSecondary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSecondary
-            )
+    val opciones = menuConfig.getCompleteMenuOptions(navController, onClose, onTemaClick, parameters)
+
+    Column {
+        opciones.forEach { opcion ->
+            OpcionMenu(
+                texto = opcion.texto,
+                icono = opcion.icono
+            ) {
+                if (opcion.id == "ayuda") {
+                    onAyudaClick()
+                    onClose()
+                } else {
+                    opcion.onClick()
+                }
+            }
         }
     }
 }
 
 @Composable
-fun DialogoAyuda(onClose: () -> Unit) {
+fun OpcionMenu(texto: String, icono: ImageVector, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .padding(bottom = 4.dp)
+            .width(180.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icono, contentDescription = texto)
+            Spacer(Modifier.width(8.dp))
+            Text(texto)
+        }
+    }
+}
+
+@Composable
+fun DialogoAyuda(onClose: () -> Unit, content: @Composable () -> Unit) {
     AlertDialog(
         onDismissRequest = onClose,
         title = {
             Text("Ayuda", style = MaterialTheme.typography.headlineSmall)
         },
         text = {
-            Column(modifier = Modifier.padding(top = 8.dp)) {
-                Text(
-                    "Instrucciones para el uso del catálogo:",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text("• Deslice hacia arriba o hacia abajo para explorar los productos.")
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Edit, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Permite editar los datos del producto seleccionado.")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Delete, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Permite eliminar un producto. Se solicitará confirmación.")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Menu, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Abre el menú lateral con opciones como ayuda y personalización de tema.")
-                }
-            }
+            content()
         },
         confirmButton = {
             TextButton(onClick = onClose) {
@@ -282,4 +306,3 @@ fun DialogoTema(
         }
     )
 }
-
