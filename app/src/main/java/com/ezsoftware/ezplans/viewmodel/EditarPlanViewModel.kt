@@ -57,7 +57,7 @@ class EditarPlanViewModel(application: Application) : AndroidViewModel(applicati
 
                 if (response.isSuccessful) {
                     response.body()?.let { body ->
-                        val resultado = RespuestaEditarPlan.fromString(body)
+                        val resultado = RespuestaEditarPlan.fromString(body.toString())
                         _respuestaEstado.value = resultado
                         Log.d(TAG, "Actualización exitosa: ${resultado.mensaje}")
                         onComplete(true)
