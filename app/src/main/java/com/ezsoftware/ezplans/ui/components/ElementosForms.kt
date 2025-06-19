@@ -54,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.viewinterop.AndroidView
 import java.time.Instant
@@ -68,6 +69,7 @@ fun OutlinedTextForms(
     ancho: Dp = Dp.Unspecified,
     alto: Dp = Dp.Unspecified,
     tipoTeclado: KeyboardType = KeyboardType.Text,
+    capitalizacion: KeyboardCapitalization = KeyboardCapitalization.Sentences,
     transfVisual: VisualTransformation = VisualTransformation.None,
     singleLine: Boolean,
     maxLines: Int = 1,
@@ -80,7 +82,9 @@ fun OutlinedTextForms(
         value = valor,
         onValueChange = onValorChange,
         label = { Text(label) },
-        keyboardOptions = KeyboardOptions(keyboardType = tipoTeclado),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = tipoTeclado,
+            capitalization = capitalizacion),
         visualTransformation = transfVisual,
         isError = hayError,
         singleLine = singleLine,
@@ -91,14 +95,16 @@ fun OutlinedTextForms(
 @Composable
 fun ButtonForms(
     texto: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    habilitado: Boolean = true
 ){
     Button(
         shape = RoundedCornerShape(5.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary),
-        onClick = onClick
+        onClick = onClick,
+        enabled = habilitado
     ) {
         Text(texto)
     }

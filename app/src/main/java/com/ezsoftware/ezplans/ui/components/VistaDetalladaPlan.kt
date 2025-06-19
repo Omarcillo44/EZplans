@@ -14,6 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosActividadPlan
@@ -36,26 +42,30 @@ import com.ezsoftware.ezplans.models.vistaDetallada.DatosDeudasPorPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenMiembrosPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
+import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.preferences.obtenerUsuariosDefault
 import com.ezsoftware.ezplans.ui.components.Dashboard.ResumenCard
+import com.ezsoftware.ezplans.viewmodel.EliminarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
+
 
 @Composable
 fun VistaDetalladaPlan(
     navControlador: NavController,
     themeViewModel: ThemeViewModel,
     vistaDetalladaViewModel: VistaDetalladaViewModel,
+    eliminarPlanViewModel: EliminarPlanViewModel,
     idPlan: Int
 ){
-    var datosVistaDetallada by remember { mutableStateOf<DatosVistaDetalladaPlan?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val idUsuario = PreferenceHelper(context).leerIDUsuario()
 
-    var mostrarAyuda by remember { mutableStateOf(false) }
-    var mostrarTema by remember { mutableStateOf(false) }
+    var datosVistaDetallada by remember { mutableStateOf<DatosVistaDetalladaPlan?>(null) }
 
     // Función para cargar datos
     fun cargarDatos() {
-        idPlan?.let {
+        idPlan.let {
             vistaDetalladaViewModel.obtenerDetallesPlan(
                 idPlan = it,
                 onSuccess = { datosVistaDetallada = it },
@@ -83,15 +93,83 @@ fun VistaDetalladaPlan(
         }
     }
 
-
     MenuFab(
-        navControlador,
-        onAyudaClick = { mostrarAyuda = true },
-        onTemaClick = { mostrarTema = true }
+        navController = navControlador,
+        themeViewModel = themeViewModel,
+        menuConfig = VistaDetPlanMenuConfig(),
+        parameters = mapOf(
+            "planId" to idPlan,
+            "userId" to idUsuario,
+            "adminId" to (datosVistaDetallada?.resumenPlan?.idAdministrador ?: 0),
+            "viewmodel" to eliminarPlanViewModel
+        )
     )
-    if (mostrarAyuda) DialogoAyuda { mostrarAyuda = false }
-    if (mostrarTema) DialogoTema(onClose = { mostrarTema = false }, themeViewModel = themeViewModel)
+}
 
+class VistaDetPlanMenuConfig : MenuConfiguration() {
+    override fun getMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        parameters: Map<String, Any?>
+    ): List<MenuOption> {
+        val planId = parameters["planId"] as? Int ?: 0
+        val userId = parameters["userId"] as? Int ?: 0
+        val adminId = parameters["adminId"] as? Int ?: 0
+        val viewmodelEliminar = parameters["viewmodel"] as? EliminarPlanViewModel
+
+        return (listOf(
+            MenuOption(
+                id = "añadir_actividad",
+                texto = "Añadir actividad",
+                icono = Icons.Default.Add,
+                onClick = {
+                    navController.navigate("CrearNuevaActividad/${planId}")
+                    onClose()
+                }
+            ),
+            MenuOption(
+                id = "editar_plan",
+                texto = "Editar plan",
+                icono = Icons.Default.Edit,
+                onClick = {
+                    // TODO: ekisde
+                    onClose()
+                }
+            )
+        ) + if(userId == adminId) { // solo le aparece al admin
+            listOf(
+                MenuOption(
+                    id = "eliminar_plan",
+                    texto = "Eliminar plan",
+                    icono = Icons.Default.Delete,
+                    onClick = {
+                        viewmodelEliminar?.eliminarPlan(planId)
+                        navController.navigate("UIPrincipal")
+                        onClose()
+                    }
+                )
+            )
+            } else {
+                emptyList()
+            } + listOf(
+                MenuOption(
+                    id = "ayuda",
+                    texto = "Ayuda",
+                    icono = Icons.Default.Info,
+                    onClick = { /* Se maneja en el componente principal */ }
+                )
+            )
+        )
+    }
+    // mensaje de ayuda mostrado
+    override fun getHelpContent(): @Composable () -> Unit = {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
+            Text(
+                "Ayuda de vista detallada plan",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @Composable

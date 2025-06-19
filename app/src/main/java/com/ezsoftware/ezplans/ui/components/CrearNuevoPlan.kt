@@ -9,12 +9,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.ezsoftware.ezplans.models.NuevoPlan.DatosMiembrosNuevoPlan
 import com.ezsoftware.ezplans.models.NuevoPlan.DatosNuevoPlan
@@ -43,6 +51,8 @@ import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
 import com.ezsoftware.ezplans.preferences.obtenerUsuariosDefault
 import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CrearNuevoPlan(
@@ -110,12 +120,35 @@ fun CrearNuevoPlan(
     }
 
     MenuFab(
-        navControlador,
-        onAyudaClick = { mostrarAyuda = true },
-        onTemaClick = { mostrarTema = true }
+        navController = navControlador,
+        themeViewModel = themeViewModel,
+        menuConfig = NuevoPlanMenuConfig()
     )
-    if (mostrarAyuda) DialogoAyuda { mostrarAyuda = false }
-    if (mostrarTema) DialogoTema(onClose = { mostrarTema = false }, themeViewModel = themeViewModel)
+}
+
+class NuevoPlanMenuConfig : MenuConfiguration() {
+    override fun getMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        parameters: Map<String, Any?>
+    ): List<MenuOption> {
+        return listOf(
+            MenuOption(
+                id = "ayuda",
+                texto = "Ayuda",
+                icono = Icons.Default.Info,
+                onClick = { /* Se maneja en el componente principal */ }
+            )
+        )
+    }
+    override fun getHelpContent(): @Composable () -> Unit = {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
+            Text(
+                "Ayuda de crear nuevo plan",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @Composable
@@ -234,8 +267,13 @@ fun BotonesNuevoPlan(
         val textoBotonIzq = if (selectedTab.value == 1) "Anterior" else "Cancelar"
         val textoBotonDer = if (selectedTab.value == 1) "Crear Plan" else "Continuar"
 
+
+        var habilitado by rememberSaveable { mutableStateOf(true) }
+
+
         ButtonForms(
             texto = textoBotonIzq,
+            habilitado = habilitado,
             onClick = {
                 if (selectedTab.value == 1) { // tal de participantes (ultima)
                     selectedTab.value -= 1
@@ -246,8 +284,11 @@ fun BotonesNuevoPlan(
         )
         Spacer(modifier = Modifier.size(20.dp))
 
+        val showDialogo = remember {mutableStateOf(false)}
+        val scope = rememberCoroutineScope()
         ButtonForms(
             texto = textoBotonDer,
+            habilitado = habilitado,
             onClick = {
                 when (selectedTab.value) {
                     0 -> {
@@ -265,37 +306,59 @@ fun BotonesNuevoPlan(
                         if (usuariosSelect.isEmpty()) {
                             Toast.makeText(context, "Debe seleccionar al menos un participante", Toast.LENGTH_SHORT).show()
                         } else {
-                            val miembros = buildList {
-                                add(DatosMiembrosNuevoPlan(idUsuario = idUsuario, administrador = true)) // agregas al admin
-                                addAll(usuariosSelect.map { id ->
-                                    DatosMiembrosNuevoPlan(idUsuario = id, administrador = false)
-                                })
-                            }
-                            val datosNuevoPlan = DatosNuevoPlan(
-                                titulo = titulo.trim(),
-                                fechaPlan = fecha,
-                                detallesPlan = detalles.trim(),
-                                miembros = miembros
-                            )
-                            nuevoPlanViewModel.limpiarEstados()
-                            nuevoPlanViewModel.validarDatosPlan(datosNuevoPlan)
-                            nuevoPlanViewModel.crearNuevoPlan(
-                                datosPlan = datosNuevoPlan,
-                                onSuccess = { mensaje ->
-                                    Log.d("Plan", "Éxito: $mensaje")
-                                    // desspues de el proceso de crear el plan se regresa la ventana principal
-                                    Toast.makeText(context, "Plan creado correctamente", Toast.LENGTH_SHORT).show()
-                                    navControlador.navigate("UIPrincipal")
-                                },
-                                onError = { error ->
-                                    Log.e("Plan", "Error: $error")
-                                    Toast.makeText(context, "Plan creado incorrectamente. Intentelo nuevamente.", Toast.LENGTH_SHORT).show()
+                            habilitado = false
+                            showDialogo.value = true
+                            scope.launch {
+                                delay(2000)
+                                // TODO: SE HACE el trabajo pesado xd
+                                val miembros = buildList {
+                                    add(DatosMiembrosNuevoPlan(idUsuario = idUsuario, administrador = true)) // agregas al admin
+                                    addAll(usuariosSelect.map { id ->
+                                        DatosMiembrosNuevoPlan(idUsuario = id, administrador = false)
+                                    })
                                 }
-                            )
+                                val datosNuevoPlan = DatosNuevoPlan(
+                                    titulo = titulo.trim(),
+                                    fechaPlan = fecha,
+                                    detallesPlan = detalles.trim(),
+                                    miembros = miembros
+                                )
+                                nuevoPlanViewModel.limpiarEstados()
+                                nuevoPlanViewModel.validarDatosPlan(datosNuevoPlan)
+                                nuevoPlanViewModel.crearNuevoPlan(
+                                    datosPlan = datosNuevoPlan,
+                                    onSuccess = { mensaje ->
+                                        Log.d("Plan", "Éxito: $mensaje")
+                                        // desspues de el proceso de crear el plan se regresa la ventana principal
+                                        Toast.makeText(context, "Plan creado correctamente", Toast.LENGTH_SHORT).show()
+                                        navControlador.navigate("UIPrincipal")
+                                    },
+                                    onError = { error ->
+                                        Log.e("Plan", "Error: $error")
+                                        Toast.makeText(context, "Plan creado incorrectamente. Intentelo nuevamente.", Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                                showDialogo.value = false
+                                //habilitado = true
+                            }
                         }
                     }
                 }
             }
         )
+        if (showDialogo.value) {
+            AlertDialog(
+                onDismissRequest = { /*TODO*/},
+                title = { Text("Port favor espere...") },
+                text = {
+                    Row (verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(Modifier.size(24.dp))
+                        Spacer(Modifier.width(16.dp))
+                        Text("Creando Plan")
+                    }
+                },
+                confirmButton = { /*TODO*/ }
+            )
+        }
     }
 }

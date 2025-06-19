@@ -4,6 +4,12 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,9 +21,9 @@ import com.ezsoftware.ezplans.models.dashboard.datosDashboard
 import com.ezsoftware.ezplans.models.dashboard.datosPlan
 import com.ezsoftware.ezplans.models.dashboard.datosResumen
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
-import com.ezsoftware.ezplans.ui.components.DialogoAyuda
-import com.ezsoftware.ezplans.ui.components.DialogoTema
+import com.ezsoftware.ezplans.ui.components.MenuConfiguration
 import com.ezsoftware.ezplans.ui.components.MenuFab
+import com.ezsoftware.ezplans.ui.components.MenuOption
 import com.ezsoftware.ezplans.ui.components.Titulo
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
@@ -93,12 +99,46 @@ fun DashboardComponent(
     }
 
     MenuFab(
-        navControlador,
-        onAyudaClick = { mostrarAyuda = true },
-        onTemaClick = { mostrarTema = true }
+        navController = navControlador,
+        themeViewModel = themeViewModel,
+        menuConfig = DashboardMenuConfig()
     )
-    if (mostrarAyuda) DialogoAyuda { mostrarAyuda = false }
-    if (mostrarTema) DialogoTema(onClose = { mostrarTema = false }, themeViewModel = themeViewModel)
+}
+
+// Configuración para la pantalla principal
+class DashboardMenuConfig : MenuConfiguration() {
+    override fun getMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        parameters: Map<String, Any?>
+    ): List<MenuOption> {
+        return listOf(
+            MenuOption(
+                id = "crear_plan",
+                texto = "Crear nuevo plan",
+                icono = Icons.Default.Add,
+                onClick = {
+                    navController.navigate("CrearNuevoPlan")
+                    onClose()
+                }
+            ),
+            MenuOption(
+                id = "ayuda",
+                texto = "Ayuda",
+                icono = Icons.Default.Info,
+                onClick = { /* Se maneja en el componente principal */ }
+            )
+        )
+    }
+    // mensaje de ayuda mostrado
+    override fun getHelpContent(): @Composable () -> Unit = {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
+            Text(
+                "Ayuda de Dashboard",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

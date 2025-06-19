@@ -71,5 +71,5 @@ interface ApiService {
     suspend fun eliminarPlan(
         @Query("idPlan") idPlan: Int,
         @Header("Authorization") token: String
-    ): Response<String>
+    ): Response<ResponseBody>
 }

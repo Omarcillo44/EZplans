@@ -28,6 +28,7 @@ import com.ezsoftware.ezplans.ui.components.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
+import com.ezsoftware.ezplans.viewmodel.EliminarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
@@ -79,6 +80,7 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
     val dashboardViewModel: DashboardViewModel = viewModel()
     val vistaDetalladaViewModel: VistaDetalladaViewModel = viewModel()
     val nuevoPlanViewModel: NuevoPlanViewModel = viewModel()
+    val eliminarPlanViewModel: EliminarPlanViewModel = viewModel()
 
 
     /*Avísame mañana que hay que cambiar el start destination, ya iba a matar toda esta parte*/
@@ -88,13 +90,14 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
         }
         composable("VistaDetalladaPlan/{idPlan}") { backStackEntry ->
             val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
-            VistaDetalladaPlan(navControlador, themeViewModel, vistaDetalladaViewModel, idPlan)
+            VistaDetalladaPlan(navControlador, themeViewModel, vistaDetalladaViewModel, eliminarPlanViewModel, idPlan)
         }
         composable("CrearNuevoPlan") { backStackEntry ->
             CrearNuevoPlan(navControlador, themeViewModel, nuevoPlanViewModel)
         }
-        composable("CrearNuevaActividad") {
-            CrearNuevaActividad(navControlador, themeViewModel)
+        composable("CrearNuevaActividad/{idPlan}") { backStackEntry ->
+            val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
+            CrearNuevaActividad(navControlador, themeViewModel, idPlan)
         }
     }
 }

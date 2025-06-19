@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,29 +41,14 @@ import androidx.compose.ui.platform.LocalContext
 import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
 import com.ezsoftware.ezplans.preferences.obtenerUsuariosDefault
 
-
-//############ sustituir por obtencion de usuarios real ############
-data class UsuariosActividad(
-    val id: Int,
-    val nombre: String,
-    val telefono: String
-)
-
-val listUsuActiv = listOf(
-    UsuariosActividad(1,"Ana López", "555-1234"),
-    UsuariosActividad(2,"Carlos Ruiz", "555-5678"),
-    UsuariosActividad(3,"Luisa Martínez", "555-9876"),
-    UsuariosActividad(4,"Luisa Martínez", "555-9876")
-)
-// ################################################################
-
 @Composable
-fun CrearNuevaActividad(navControlador: NavController, themeViewModel: ThemeViewModel,){
+fun CrearNuevaActividad(
+    navControlador: NavController,
+    themeViewModel: ThemeViewModel,
+    idPlan: Int
+){
     val context = LocalContext.current
     val usuariosDefault = remember { obtenerUsuariosDefault(context) }
-
-    var mostrarAyuda by remember { mutableStateOf(false) }
-    var mostrarTema by remember { mutableStateOf(false) }
 
     var errorTitulo by rememberSaveable { mutableStateOf(false) }
     var titulo by rememberSaveable { mutableStateOf("") }
@@ -114,12 +100,36 @@ fun CrearNuevaActividad(navControlador: NavController, themeViewModel: ThemeView
     }
 
     MenuFab(
-        navControlador,
-        onAyudaClick = { mostrarAyuda = true },
-        onTemaClick = { mostrarTema = true }
+        navController = navControlador,
+        themeViewModel = themeViewModel,
+        menuConfig = NuevaActivMenuConfig()
     )
-    if (mostrarAyuda) DialogoAyuda { mostrarAyuda = false }
-    if (mostrarTema) DialogoTema(onClose = { mostrarTema = false }, themeViewModel = themeViewModel)
+}
+
+class NuevaActivMenuConfig : MenuConfiguration() {
+    override fun getMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        parameters: Map<String, Any?>
+    ): List<MenuOption> {
+        return listOf(
+            MenuOption(
+                id = "ayuda",
+                texto = "Ayuda",
+                icono = Icons.Default.Info,
+                onClick = { /* Se maneja en el componente principal */ }
+            )
+        )
+    }
+
+    override fun getHelpContent(): @Composable () -> Unit = {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
+            Text(
+                "Ayuda de crear nueva actividad",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @Composable
