@@ -1,5 +1,7 @@
 package com.ezsoftware.ezplans.network
 
+import com.ezsoftware.ezplans.models.DatosEditarPlan
+import com.ezsoftware.ezplans.models.DatosVistaEditarPlan
 import com.ezsoftware.ezplans.models.NuevaActividad.DatosNuevaActividad
 import com.ezsoftware.ezplans.models.Pagos.DatosNuevoPago
 import com.ezsoftware.ezplans.models.NuevoPlan.DatosNuevoPlan
@@ -16,6 +18,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ApiService {
@@ -66,10 +69,23 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<String>
 
-    // Agregar este método en la interfaz ApiService.kt
     @DELETE("/planes/eliminar")
     suspend fun eliminarPlan(
         @Query("idPlan") idPlan: Int,
+        @Header("Authorization") token: String
+    ): Response<ResponseBody>
+
+    // Agregar este método en la interfaz ApiService.kt
+    @GET("/planes/vistaEditarPlan")
+    suspend fun obtenerDatosEditarPlan(
+        @Query("idPlan") idPlan: Int,
+        @Header("Authorization") token: String
+    ): Response<DatosVistaEditarPlan>
+
+    // Agregar en ApiService.kt
+    @PUT("/planes/editar")
+    suspend fun actualizarPlan(
+        @Body datosPlan: DatosEditarPlan,
         @Header("Authorization") token: String
     ): Response<String>
 }

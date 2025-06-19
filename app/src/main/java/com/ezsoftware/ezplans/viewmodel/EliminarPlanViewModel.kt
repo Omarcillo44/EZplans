@@ -56,7 +56,7 @@ class EliminarPlanViewModel(application: Application) : AndroidViewModel(applica
                 if (response.isSuccessful) {
                     response.body()?.let { body ->
                         Log.d("EliminarPlanVM", "Respuesta del servidor: $body")
-                        val resultado = RespuestaEliminarPlan.fromString(body)
+                        val resultado = RespuestaEliminarPlan.fromString(body.toString())
                         _respuestaState.value = resultado
                         onComplete(resultado)
                     } ?: run {
