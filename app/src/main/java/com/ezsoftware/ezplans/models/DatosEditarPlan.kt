@@ -7,5 +7,5 @@ data class DatosEditarPlan(
     val idPlan: Int,
     val titulo: String,
     val detalles: String,
-    val fecha: LocalDate
+    val fecha: String
 )

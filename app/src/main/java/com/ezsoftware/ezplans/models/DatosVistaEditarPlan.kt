@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class DatosVistaEditarPlan(
     val idPlan: Int,
     val titulo: String,
-    val fecha: LocalDate,
+    val fecha: String,
     val detalles: String,
     val idAdministrador: Int
 )
