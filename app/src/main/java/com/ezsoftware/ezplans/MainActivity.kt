@@ -23,17 +23,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
 import com.ezsoftware.ezplans.ui.components.CrearNuevoPlan
+import com.ezsoftware.ezplans.ui.components.EditarPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
 import com.ezsoftware.ezplans.ui.components.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
+import com.ezsoftware.ezplans.viewmodel.EditarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.EliminarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.MiembrosPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.NuevaActividadViewModel
 import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
+import com.ezsoftware.ezplans.viewmodel.VistaEditarPlanViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -85,7 +88,8 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
     val eliminarPlanViewModel: EliminarPlanViewModel = viewModel()
     val miembrosPlanViewModel: MiembrosPlanViewModel = viewModel()
     val nuevaActividadViewModel: NuevaActividadViewModel = viewModel()
-
+    val editarPlanViewModel: EditarPlanViewModel = viewModel()
+    val vistaEditarPlanViewModel: VistaEditarPlanViewModel = viewModel()
 
     /*Avísame mañana que hay que cambiar el start destination, ya iba a matar toda esta parte*/
     NavHost(navController = navControlador, startDestination = "UIPrincipal") {
@@ -102,6 +106,10 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
         composable("CrearNuevaActividad/{idPlan}") { backStackEntry ->
             val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
             CrearNuevaActividad(navControlador, themeViewModel, miembrosPlanViewModel, nuevaActividadViewModel, idPlan)
+        }
+        composable("EditarPlan/{idPlan}") { backStackEntry ->
+            val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
+            EditarPlan(navControlador, themeViewModel, editarPlanViewModel, vistaEditarPlanViewModel, idPlan)
         }
     }
 }

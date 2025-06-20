@@ -1,5 +1,6 @@
 package com.ezsoftware.ezplans.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +59,12 @@ fun VistaDetalladaPlan(
     eliminarPlanViewModel: EliminarPlanViewModel,
     idPlan: Int
 ){
+    BackHandler {
+        navControlador.navigate("UIPrincipal") {
+            //popUpTo(0) { inclusive = true }
+        }
+    }
+
     val context = LocalContext.current
     val idUsuario = PreferenceHelper(context).leerIDUsuario()
 
@@ -125,18 +132,17 @@ class VistaDetPlanMenuConfig : MenuConfiguration() {
         this.viewmodelEliminar = parameters["viewmodel"] as? EliminarPlanViewModel
         this.navControlador = navController
 
-        return (listOf(
-            MenuOption(
-                id = "añadir_actividad",
-                texto = "Añadir actividad",
-                icono = Icons.Default.Add,
-                onClick = {
-                    navController.navigate("CrearNuevaActividad/${planId}")
-                    onClose()
-                }
-            )
-        ) + if(userId == adminId) { // solo le aparece al admin
+        return if(userId == adminId) { // solo le aparece al admin
             listOf(
+                MenuOption(
+                    id = "añadir_actividad",
+                    texto = "Añadir actividad",
+                    icono = Icons.Default.Add,
+                    onClick = {
+                        navController.navigate("CrearNuevaActividad/${planId}")
+                        onClose()
+                    }
+                ),
                 MenuOption(
                     id = "eliminar_plan",
                     texto = "Eliminar plan",
@@ -151,20 +157,19 @@ class VistaDetPlanMenuConfig : MenuConfiguration() {
                     texto = "Editar plan",
                     icono = Icons.Default.Edit,
                     onClick = {
-                        // TODO: ekisde
+                        navController.navigate("EditarPlan/${planId}")
                         onClose()
                     }
                 )
             )
-            } else {
-                emptyList()
-            } + listOf(
-                MenuOption(
-                    id = "ayuda",
-                    texto = "Ayuda",
-                    icono = Icons.Default.Info,
-                    onClick = { /* Se maneja en el componente principal */ }
-                )
+        } else {
+            emptyList()
+        } + listOf(
+            MenuOption(
+                id = "ayuda",
+                texto = "Ayuda",
+                icono = Icons.Default.Info,
+                onClick = { /* Se maneja en el componente principal */ }
             )
         )
     }

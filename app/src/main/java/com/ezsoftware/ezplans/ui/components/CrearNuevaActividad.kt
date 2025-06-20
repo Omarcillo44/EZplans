@@ -53,6 +53,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
+import androidx.activity.compose.BackHandler
 
 fun BigDecimal.formatearParaUI(): String {
     // Si es un número entero, mostrar sin decimales
@@ -71,6 +72,12 @@ fun CrearNuevaActividad(
     nuevaActividadViewModel: NuevaActividadViewModel,
     idPlan: Int
 ){
+    BackHandler {
+        navControlador.navigate("VistaDetalladaPlan/${idPlan}") {
+            //popUpTo(0) { inclusive = true }
+        }
+    }
+
     var errorTitulo by rememberSaveable { mutableStateOf(false) }
     var titulo by rememberSaveable { mutableStateOf("") }
     var detalles by rememberSaveable { mutableStateOf("") }
@@ -499,7 +506,7 @@ fun BotonesNuevaActividad(
                         habilitado = false
                         showDialogo.value = true
                         scope.launch {
-                            delay(2000)
+                            delay(2500)
                             // TODO: SE HACE el trabajo pesado xd
                             val datosNuevaActividad = DatosNuevaActividad(
                                 idPlan = idPlan,

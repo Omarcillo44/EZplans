@@ -2,6 +2,7 @@ package com.ezsoftware.ezplans.ui.components
 
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,11 @@ fun CrearNuevoPlan(
     themeViewModel: ThemeViewModel,
     nuevoPlanViewModel: NuevoPlanViewModel
 ){
+    BackHandler {
+        navControlador.navigate("UIPrincipal") {
+            //popUpTo(0) { inclusive = true }
+        }
+    }
     val context = LocalContext.current
     val usuariosDefault = remember { obtenerUsuariosDefault(context) }
     val idUsuario = PreferenceHelper(context).leerIDUsuario()
@@ -306,7 +312,7 @@ fun BotonesNuevoPlan(
                             habilitado = false
                             showDialogo.value = true
                             scope.launch {
-                                delay(2000)
+                                delay(2500)
                                 // TODO: SE HACE el trabajo pesado xd
                                 val miembros = buildList {
                                     add(DatosMiembrosNuevoPlan(idUsuario = idUsuario, administrador = true)) // agregas al admin
