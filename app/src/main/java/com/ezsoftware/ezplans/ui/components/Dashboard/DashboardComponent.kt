@@ -72,7 +72,10 @@ fun DashboardComponent(
 
     Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
         LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-            item { Titulo("Resumen") }
+            item {
+                Titulo("Resumen")
+                Spacer(modifier = Modifier.size(5.dp))
+            }
 
             item {
                 errorMessage?.let {

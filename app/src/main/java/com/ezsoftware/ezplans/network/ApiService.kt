@@ -67,7 +67,7 @@ interface ApiService {
     suspend fun crearNuevaActividad(
         @Body datosActividad: DatosNuevaActividad,
         @Header("Authorization") token: String
-    ): Response<String>
+    ): Response<ResponseBody>
 
     @DELETE("/planes/eliminar")
     suspend fun eliminarPlan(

@@ -60,6 +60,8 @@ data class MenuOption(
 
 // Clase abstracta para configurar diferentes tipos de menú
 abstract class MenuConfiguration {
+    open fun getConfirmDialog(): (@Composable () -> Unit)? = null
+
     abstract fun getMenuOptions(
         navController: NavController,
         onClose: () -> Unit,
@@ -123,6 +125,10 @@ fun MenuFab(
             onClose = { mostrarTema = false },
             themeViewModel = themeViewModel
         )
+    }
+
+    menuConfig.getConfirmDialog()?.let { dialogo ->
+        dialogo() // lo llama como composable
     }
 }
 
@@ -206,103 +212,4 @@ fun OpcionMenu(texto: String, icono: ImageVector, onClick: () -> Unit) {
             Text(texto)
         }
     }
-}
-
-@Composable
-fun DialogoAyuda(onClose: () -> Unit, content: @Composable () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = {
-            Text("Ayuda", style = MaterialTheme.typography.headlineSmall)
-        },
-        text = {
-            content()
-        },
-        confirmButton = {
-            TextButton(onClick = onClose) {
-                Text("Entendido")
-            }
-        }
-    )
-}
-
-@Composable
-fun DialogoTema(
-    onClose: () -> Unit,
-    themeViewModel: ThemeViewModel
-) {
-    val context: Context = LocalContext.current
-    val preferenciaModoOscuro = remember { PreferenceHelper(context) }
-
-    var estadoModoOscuro by remember { mutableStateOf(preferenciaModoOscuro.leerEstadoModoOscuro()) }
-
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = {
-            Text("Seleccionar tema", style = MaterialTheme.typography.headlineSmall)
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Modo claro
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            themeViewModel.setDarkTheme(false)
-                            estadoModoOscuro = false
-                            preferenciaModoOscuro.guardarEstadoModoOscuro(false)
-                        }
-                        .padding(vertical = 6.dp)
-                ) {
-                    RadioButton(selected = !estadoModoOscuro, onClick = null)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Modo claro", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                // Modo oscuro
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            themeViewModel.setDarkTheme(true)
-                            estadoModoOscuro = true
-                            preferenciaModoOscuro.guardarEstadoModoOscuro(true)
-                        }
-                        .padding(vertical = 6.dp)
-                ) {
-                    RadioButton(selected = estadoModoOscuro, onClick = null)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Modo oscuro", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                // Colores dinámicos (Android 12+)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                val nuevoValor = !themeViewModel.themeState.value.useDynamicColor
-                                themeViewModel.setDynamicColor(nuevoValor)
-                            }
-                            .padding(vertical = 6.dp)
-                    ) {
-                        RadioButton(
-                            selected = themeViewModel.themeState.value.useDynamicColor,
-                            onClick = null
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Colores dinámicos", style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onClose) {
-                Text("Aceptar", style = MaterialTheme.typography.labelLarge)
-            }
-        }
-    )
 }

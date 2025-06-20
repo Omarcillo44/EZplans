@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package com.ezsoftware.ezplans.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,30 +18,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
+import com.ezsoftware.ezplans.models.NuevaActividad.DatosMiembrosNuevaActividad
+import com.ezsoftware.ezplans.models.NuevaActividad.Miembros.DatosUsuarioEnPlan
+import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 
 @Composable
 fun TabInfoBasicaActiv(
@@ -92,9 +98,9 @@ fun TabInfoBasicaActiv(
 
 @Composable
 fun TabParticipantesActiv(
-    usuariosDefault: List<UsuarioRegistrado>,
+    usuariosPlan: List<DatosUsuarioEnPlan>,
     usuariosSelect: List<Int>,
-    divicionIgual: Boolean,
+    divisionIgual: Boolean,
     nombreUsuSelect: List<String>,
     onUsuariosSelectChange: (List<Int>) -> Unit,
     onDivicionIgual: (Boolean) -> Unit,
@@ -115,24 +121,24 @@ fun TabParticipantesActiv(
             modifier = Modifier
                 .padding(horizontal = 5.dp, vertical = 6.dp)
         ) {
-            usuariosDefault.forEach { usuario ->
+            usuariosPlan.forEach { usuario ->
                 CardUsuariosDisp(
-                    nombre = "${usuario.nombre_usuario} ${usuario.apellidos_usuario}",
-                    telefono = usuario.celular_usuario,
-                    checked = usuario.id_usuario in usuariosSelect,
+                    nombre = "${usuario.nombreUsuario} ${usuario.apellidosUsuario}",
+                    telefono = usuario.celularUsuario,
+                    checked = usuario.idUsuario in usuariosSelect,
                     onCheckedChange = { checked ->
                         onUsuariosSelectChange(
                             if (checked) {
-                                usuariosSelect + usuario.id_usuario
+                                usuariosSelect + usuario.idUsuario
                             } else {
-                                usuariosSelect - usuario.id_usuario
+                                usuariosSelect - usuario.idUsuario
                             }
                         )
                         onNombreUsuSelect(
                             if (checked) {
-                                nombreUsuSelect + "${usuario.nombre_usuario} ${usuario.apellidos_usuario}"
+                                nombreUsuSelect + "${usuario.nombreUsuario} ${usuario.apellidosUsuario}"
                             } else {
-                                nombreUsuSelect + "${usuario.nombre_usuario} ${usuario.apellidos_usuario}"
+                                nombreUsuSelect - "${usuario.nombreUsuario} ${usuario.apellidosUsuario}"
                             }
                         )
                     }
@@ -153,7 +159,7 @@ fun TabParticipantesActiv(
                 CardSeleccionMetodo(
                     texto = "División Igual",
                     descripcion = "Dividir entre todos por igual",
-                    seleccionado = divicionIgual,
+                    seleccionado = divisionIgual,
                     onClick = { onDivicionIgual(true) }
                 )
             }
@@ -162,7 +168,7 @@ fun TabParticipantesActiv(
                 CardSeleccionMetodo(
                     texto = "Montos Personalizados",
                     descripcion = "Asignar montos personalizados",
-                    seleccionado = !divicionIgual,
+                    seleccionado = !divisionIgual,
                     onClick = { onDivicionIgual(false) }
                 )
             }
@@ -173,10 +179,34 @@ fun TabParticipantesActiv(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TabContribuciones(
-    gastoTotal: Int,
     usuariosSelect: List<Int>,
-    nombreUsuSelect: List<String>
+    nombreUsuSelect: List<String>,
+    divisionIgual: Boolean,
+    miembrosContribuciones: List<DatosMiembrosNuevaActividad>,
+    onMiembrosContribucionesChange: (List<DatosMiembrosNuevaActividad>) -> Unit,
+    gastoTotal: BigDecimal,
+    todosLosUsuarios: List<String>,
+    todosLosIds: List<Int>,
+    hayErrorDiferencia: Boolean,
+    diferencia: BigDecimal,
+    mostrarError: Boolean
 ){
+    // Mantener división exacta para cálculos internos
+    LaunchedEffect(divisionIgual, gastoTotal, usuariosSelect.size) {
+        if (divisionIgual && usuariosSelect.isNotEmpty() && gastoTotal > BigDecimal.ZERO) {
+            val montoPorPersona = try {
+                gastoTotal.divide(BigDecimal(usuariosSelect.size), MathContext.DECIMAL128)
+            } catch (e: ArithmeticException) {
+                gastoTotal.divide(BigDecimal(usuariosSelect.size), 10, RoundingMode.HALF_UP)
+            }
+
+            val nuevosmiembros = miembrosContribuciones.map { miembro ->
+                miembro.copy(montoCorrespondiente = montoPorPersona)
+            }
+            onMiembrosContribucionesChange(nuevosmiembros)
+        }
+    }
+
     Column (
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 20.dp)
@@ -193,24 +223,63 @@ fun TabContribuciones(
                 SubTitulo("Contribuciones y Pagos", false)
             }
             Row {
-                SubTitulo("Gasto Total: $1000.00", true)
+                SubTitulo("Gasto Total: $${gastoTotal.formatearParaUI()}", true)
             }
         }
+
+        if (mostrarError) {
+            Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)) {
+                Icon(imageVector = Icons.Default.Info, "informacion", tint = MaterialTheme.colorScheme.error)
+                TextoPeq(
+                    "Los montos adeudados no coinciden con el total pagado. Diferencia: ${diferencia.abs().formatearParaUI()}",
+                    MaterialTheme.colorScheme.error
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.size(8.dp))
         Column (
             verticalArrangement = Arrangement.spacedBy(18.dp),
             modifier = Modifier
                 .padding(horizontal = 5.dp, vertical = 6.dp)
         ) {
-            usuariosSelect.forEach { usuario ->
-                CardContribuciones()
+            miembrosContribuciones.forEachIndexed { index, miembro ->
+                val nombreUsuario = nombreUsuSelect.getOrNull(index) ?: "Usuario ${miembro.idUsuario}"
+
+                CardContribuciones(
+                    miembro = miembro,
+                    nombreUsuario = nombreUsuario,
+                    divisionIgual = divisionIgual,
+                    todosLosUsuarios = todosLosUsuarios,
+                    idsUsuarios = todosLosIds,
+                    onMiembroChange = { nuevoMiembro ->
+                        val nuevaLista = miembrosContribuciones.toMutableList()
+                        nuevaLista[index] = nuevoMiembro
+                        onMiembrosContribucionesChange(nuevaLista)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun CardContribuciones(){
+fun CardContribuciones(
+    miembro: DatosMiembrosNuevaActividad,
+    nombreUsuario: String,
+    divisionIgual: Boolean,
+    todosLosUsuarios: List<String>,
+    idsUsuarios: List<Int>,
+    onMiembroChange: (DatosMiembrosNuevaActividad) -> Unit
+){
+    // Calcula el estado de deuda con formateo
+    val diferencia = miembro.aportacion - miembro.montoCorrespondiente
+    val (textoDeuda, colorDeuda) = when {
+        diferencia > BigDecimal.ZERO -> "Le deben $${diferencia.formatearParaUI()}" to Color(0xFF4CAF50)
+        diferencia < BigDecimal.ZERO -> "Debe $${diferencia.abs().formatearParaUI()}" to Color(0xFFF44336)
+        else -> "Sin deudas" to Color(0xFF9E9E9E)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -233,37 +302,17 @@ fun CardContribuciones(){
                 Imagen("placeholder", 50)
                 Spacer(modifier = Modifier.size(10.dp))
                 Column {
-                    Texto("nombre")
+                    Texto(nombreUsuario)
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF4CAF50).copy(alpha = 0.3f),
+                        color = colorDeuda.copy(alpha = 0.3f),
                         tonalElevation = 1.dp,
                         modifier = Modifier.padding(4.dp)
                     ) {
                         Box(Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
-                            TextoPeq("Le deben $10.00")
-                        }
-                    }/*
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFF44336).copy(alpha = 0.3f),
-                        tonalElevation = 1.dp,
-                        modifier = Modifier.padding(4.dp)
-                    ) {
-                        Box(Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
-                            TextoPeq("Debe $10.00")
+                            TextoPeq(textoDeuda)
                         }
                     }
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF9E9E9E).copy(alpha = 0.3f),
-                        tonalElevation = 1.dp,
-                        modifier = Modifier.padding(4.dp)
-                    ) {
-                        Box(Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
-                            TextoPeq("Sin deudas $10.00")
-                        }
-                    }*/
                 }
             }
             Spacer(modifier = Modifier.size(10.dp))
@@ -271,42 +320,120 @@ fun CardContribuciones(){
             Row(Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
                     TextoPeq("Cantidad pagada")
-                    var valorSeleccionado by remember { mutableStateOf(0) }
 
                     SelectorDeNumeros(
-                        valor = valorSeleccionado,
-                        rangoMin = 1,
-                        onValorCambiado = { valorSeleccionado = it }
+                        valor = miembro.aportacion,
+                        rangoMin = BigDecimal.ZERO,
+                        onValorCambiado = { nuevoValor ->
+                            onMiembroChange(
+                                miembro.copy(aportacion = nuevoValor)
+                            )
+                        }
                     )
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     TextoPeq("Debe pagar")
-                    var valorSeleccionado by remember { mutableStateOf(0) }
 
                     SelectorDeNumeros(
-                        valor = valorSeleccionado,
-                        rangoMin = 1,
-                        onValorCambiado = { valorSeleccionado = it }
+                        valor = miembro.montoCorrespondiente,
+                        rangoMin = BigDecimal.ZERO,
+                        enabled = !divisionIgual,
+                        onValorCambiado = { nuevoValor ->
+                            if (!divisionIgual) {
+                                onMiembroChange(
+                                    miembro.copy(montoCorrespondiente = nuevoValor)
+                                )
+                            }
+                        }
                     )
                 }
             }
 
             TextoPeq("¿A quién le debe?")
-            val listaDeUsuarios = listOf("Ana", "Luis", "Carlos", "María")
-            var usuarioSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+
+            // Determinar el índice seleccionado basado en idAcreedorDeuda
+            val indiceAcreedorSeleccionado = miembro.idAcreedorDeuda?.let { idAcreedor ->
+                idsUsuarios.indexOf(idAcreedor).takeIf { it >= 0 }
+            }
 
             SingleUserDropdown(
-                opciones = listaDeUsuarios,
-                seleccionado = usuarioSeleccionado,
-                onSeleccionCambio = { usuarioSeleccionado = it }
-            )
+                opciones = todosLosUsuarios,
+                seleccionado = indiceAcreedorSeleccionado, // null por defecto si no hay acreedor
+                placeholder = "Sin acreedor (se debe a sí mismo)",
+                onSeleccionCambio = { indiceSeleccionado ->
+                    val nuevoIdAcreedor = indiceSeleccionado?.let { indice ->
+                        val idSeleccionado = idsUsuarios[indice]
+                        // Si el usuario se selecciona a sí mismo, guardar null
+                        if (idSeleccionado == miembro.idUsuario) null else idSeleccionado
+                    }
 
+                    val montoDeuda = if (diferencia < BigDecimal.ZERO &&
+                        indiceSeleccionado != null &&
+                        nuevoIdAcreedor != null) {
+                        diferencia.abs()
+                    } else {
+                        BigDecimal.ZERO
+                    }
+
+                    onMiembroChange(
+                        miembro.copy(
+                            idAcreedorDeuda = nuevoIdAcreedor,
+                            montoDeuda = montoDeuda
+                        )
+                    )
+                }
+            )
         }
     }
 }
 
 @Composable
-fun TabResumenDeudas(){
+fun TabResumenDeudas(
+    titulo: String,
+    gastoTotal: BigDecimal,
+    usuariosSelect: List<Int>,
+    miembrosContribuciones: List<DatosMiembrosNuevaActividad>,
+    datosMiembrosPlan: List<DatosUsuarioEnPlan>,
+){
+    data class DeudaConNombres(
+        val nombreDeudor: String,
+        val nombreAcreedor: String,
+        val deudaCantidad: String
+    )
+
+    fun crearListaDeudas(
+        miembrosContribuciones: List<DatosMiembrosNuevaActividad>,
+        datosMiembrosPlan: List<DatosUsuarioEnPlan>
+    ): List<DeudaConNombres> {
+        // Crear un mapa para buscar nombres por ID de usuario
+        val mapaNombres = datosMiembrosPlan.associate { miembro ->
+            miembro.idUsuario to "${miembro.nombreUsuario} ${miembro.apellidosUsuario}"
+        }
+
+        // Filtrar solo los que tienen idAcreedorDeuda diferente de null y montoDeuda > 0
+        return miembrosContribuciones
+            .filter { it.idAcreedorDeuda != null && it.montoDeuda > BigDecimal.ZERO }
+            .mapNotNull { contribucion ->
+                val nombreDeudor = mapaNombres[contribucion.idUsuario]
+                val nombreAcreedor = mapaNombres[contribucion.idAcreedorDeuda]
+
+                if (nombreDeudor != null && nombreAcreedor != null) {
+                    DeudaConNombres(
+                        nombreDeudor = nombreDeudor,
+                        nombreAcreedor = nombreAcreedor,
+                        deudaCantidad = "$${contribucion.montoDeuda.setScale(2, RoundingMode.HALF_UP).toString()}"
+                    )
+                } else null
+            }
+    }
+
+    val participantes = usuariosSelect.size
+    val deudasGeneradas = crearListaDeudas(miembrosContribuciones, datosMiembrosPlan)
+    val cantidadDeudas = deudasGeneradas.size
+
+    // Verificar si hay contribuciones configuradas
+    val hayContribuciones = miembrosContribuciones.any { it.aportacion > BigDecimal.ZERO }
+
     Column (
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 20.dp)
@@ -315,17 +442,202 @@ fun TabResumenDeudas(){
         TextoPeq("Deudas generadas de la actividad")
         Spacer(modifier = Modifier.size(25.dp))
 
-        Column (
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-            modifier = Modifier
-                .padding(horizontal = 5.dp, vertical = 6.dp)
-        ) {
-            //usuariosSelect.forEach { usuario ->
-                //CardResumenDeudas()
-            //}
+        // Mostrar diferentes mensajes según el estado
+        when {
+            !hayContribuciones -> {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Configura las contribuciones",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Ve al tab 'Contribuciones' para configurar quién pagó qué y cómo se dividirán los gastos.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            deudasGeneradas.isEmpty() -> {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "¡Perfecto! No hay deudas",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Todos los gastos están balanceados. No hay pendientes por saldar.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                Column (
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp, vertical = 6.dp)
+                ) {
+                    deudasGeneradas.forEach { deuda ->
+                        CardResumenDeudas(
+                            deudor = deuda.nombreDeudor,
+                            acreedor = deuda.nombreAcreedor,
+                            monto = deuda.deudaCantidad
+                        )
+                    }
+                }
+            }
         }
 
-        CardResumenActividad()
+        Spacer(modifier = Modifier.height(20.dp))
+
+        CardResumenActividad(
+            titulo = titulo,
+            gastoTotal = gastoTotal,
+            participantes = participantes,
+            cantidadDeudas = cantidadDeudas
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CardResumenDeudas(
+    deudor: String,
+    acreedor: String,
+    monto: String
+){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(15.dp)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+            ) {
+                // Deudor
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TextoPeq(
+                            deudor.split(" ")
+                                .mapNotNull { it.firstOrNull()?.toString() }
+                                .take(2)
+                                .joinToString(""),
+                            MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    Column {
+                        Texto(deudor)
+                        TextoPeq("Deudor")
+                    }
+                }
+
+                // Flecha y monto
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Texto("${monto}")
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = "debe a",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Acreedor
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Texto(acreedor)
+                        TextoPeq("Acreedor")
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.secondary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TextoPeq(
+                            acreedor.split(" ")
+                                .mapNotNull { it.firstOrNull()?.toString() }
+                                .take(2)
+                                .joinToString(""),
+                            MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -350,6 +662,7 @@ fun CardSeleccionMetodo(
             modifier = Modifier.fillMaxSize()
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Imagen("placeholder", 25)
             Texto(texto, false, textColor, Modifier.fillMaxWidth(), TextAlign.Center)
@@ -359,50 +672,12 @@ fun CardSeleccionMetodo(
 }
 
 @Composable
-fun CardResumenDeudas(
-    nombre: String,
-    telefono: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+fun CardResumenActividad(
+    titulo: String,
+    gastoTotal: BigDecimal,
+    participantes: Int,
+    cantidadDeudas: Int
 ){
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 0.dp)
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(15.dp)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(15.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Imagen("placeholder", 50)
-            Spacer(modifier = Modifier.size(5.dp))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                Texto(nombre, true)
-                TextoPeq(telefono)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange
-            )
-        }
-    }
-}
-
-@Composable
-fun CardResumenActividad(){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -426,24 +701,24 @@ fun CardResumenActividad(){
                 Column(modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Texto("Titulo")
-                    Texto("Plan sano", true)
+                    Texto(titulo.trim(), true)
                 }
                 Column (modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(5.dp)){
                     Texto("Gasto Total")
-                    Texto("$30.00", true)
+                    Texto("$${gastoTotal}", true)
                 }
             }
             Row {
                 Column (modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(5.dp)){
                     Texto("Participantes")
-                    Texto("3 personas", true)
+                    Texto("${participantes} personas", true)
                 }
                 Column (modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(5.dp)){
                     Texto("Deudas generadas")
-                    Texto("1 transacción", true)
+                    Texto("${cantidadDeudas} transacción", true)
                 }
             }
         }

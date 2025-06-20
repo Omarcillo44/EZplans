@@ -64,9 +64,6 @@ fun CrearNuevoPlan(
     val usuariosDefault = remember { obtenerUsuariosDefault(context) }
     val idUsuario = PreferenceHelper(context).leerIDUsuario()
 
-    var mostrarAyuda by remember { mutableStateOf(false) }
-    var mostrarTema by remember { mutableStateOf(false) }
-
     var errorTitulo by rememberSaveable { mutableStateOf(false) }
     var titulo by rememberSaveable { mutableStateOf("") }
     var detalles by rememberSaveable { mutableStateOf("") }
@@ -331,13 +328,13 @@ fun BotonesNuevoPlan(
                                         Log.d("Plan", "Éxito: $mensaje")
                                         // desspues de el proceso de crear el plan se regresa la ventana principal
                                         Toast.makeText(context, "Plan creado correctamente", Toast.LENGTH_SHORT).show()
-                                        navControlador.navigate("UIPrincipal")
                                     },
                                     onError = { error ->
                                         Log.e("Plan", "Error: $error")
                                         Toast.makeText(context, "Plan creado incorrectamente. Intentelo nuevamente.", Toast.LENGTH_SHORT).show()
                                     }
                                 )
+                                navControlador.navigate("UIPrincipal")
                                 showDialogo.value = false
                                 //habilitado = true
                             }
@@ -349,7 +346,7 @@ fun BotonesNuevoPlan(
         if (showDialogo.value) {
             AlertDialog(
                 onDismissRequest = { /*TODO*/},
-                title = { Text("Port favor espere...") },
+                title = { Text("Por favor espere...") },
                 text = {
                     Row (verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(Modifier.size(24.dp))

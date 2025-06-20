@@ -4,11 +4,13 @@ import android.widget.NumberPicker
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -49,6 +51,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -56,7 +59,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -183,17 +189,53 @@ fun DatePickerField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectorDeNumeros(
-    valor: Int,
-    rangoMin: Int = 0,
-    rangoMax: Int = Int.MAX_VALUE,
-    onValorCambiado: (Int) -> Unit
+    valor: BigDecimal,
+    rangoMin: BigDecimal = BigDecimal.ZERO,
+    rangoMax: BigDecimal = BigDecimal(999999.99),
+    enabled: Boolean = true,
+    onValorCambiado: (BigDecimal) -> Unit
 ) {
-    var texto by remember { mutableStateOf(valor.toString()) }
+    // Función para formatear número de forma inteligente
+    fun formatearInteligente(valor: BigDecimal): String {
+        return valor.formatearParaUI()
+    }
+
+    var texto by rememberSaveable { mutableStateOf(formatearInteligente(valor)) }
+
+    // Actualizar texto cuando cambia el valor externamente
+    LaunchedEffect(valor) {
+        texto = formatearInteligente(valor)
+    }
 
     fun actualizarDesdeTexto(nuevoTexto: String) {
-        texto = nuevoTexto
-        nuevoTexto.toIntOrNull()?.let {
-            if (it in rangoMin..rangoMax) onValorCambiado(it)
+        if (!enabled) return
+
+        // Filtrar solo números y punto decimal
+        val textoFiltrado = nuevoTexto.filter { it.isDigit() || it == '.' }
+
+        // Verificar que solo haya un punto decimal
+        val puntosDecimales = textoFiltrado.count { it == '.' }
+        if (puntosDecimales > 1) return
+
+        // Limitar a 2 decimales máximo
+        val partes = textoFiltrado.split(".")
+        val textoLimitado = if (partes.size == 2 && partes[1].length > 2) {
+            "${partes[0]}.${partes[1].take(2)}"
+        } else {
+            textoFiltrado
+        }
+
+        texto = textoLimitado
+
+        if (textoLimitado.isNotEmpty() && textoLimitado != ".") {
+            try {
+                val valorDecimal = BigDecimal(textoLimitado)
+                if (valorDecimal >= rangoMin && valorDecimal <= rangoMax) {
+                    onValorCambiado(valorDecimal)
+                }
+            } catch (e: NumberFormatException) {
+                // Ignorar entrada inválida
+            }
         }
     }
 
@@ -201,67 +243,99 @@ fun SelectorDeNumeros(
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (enabled) 2.dp else 0.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 8.dp, vertical = 2.dp) // REDUCIDO padding vertical
         ) {
-            IconButton(
-                onClick = {
-                    if (valor > rangoMin) onValorCambiado(valor - 1)
-                    texto = (valor - 1).coerceAtLeast(rangoMin).toString()
-                },
-                enabled = valor > rangoMin,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("-", style = MaterialTheme.typography.headlineMedium)
-            }
-
+            // Campo de texto centrado con altura reducida
             TextField(
                 value = texto,
                 onValueChange = { actualizarDesdeTexto(it) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
+                enabled = enabled,
                 modifier = Modifier
-                    .weight(2f)
+                    .fillMaxWidth()
                     .padding(horizontal = 4.dp),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 ),
-                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                textStyle = LocalTextStyle.current.copy(
+                    textAlign = TextAlign.Center,
+                )
             )
 
-            IconButton(
-                onClick = {
-                    if (valor < rangoMax) onValorCambiado(valor + 1)
-                    texto = (valor + 1).coerceAtMost(rangoMax).toString()
-                },
-                enabled = valor < rangoMax,
-                modifier = Modifier.weight(1f)
+            // Botones de incremento/decremento con altura reducida
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp), // ALTURA FIJA REDUCIDA
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("+", style = MaterialTheme.typography.headlineMedium)
+                IconButton(
+                    onClick = {
+                        if (valor > rangoMin && enabled) {
+                            // CAMBIO: Decrementar de 1 en 1
+                            val nuevoValor = valor.subtract(BigDecimal.ONE).max(rangoMin)
+                            onValorCambiado(nuevoValor)
+                        }
+                    },
+                    enabled = enabled && valor > rangoMin,
+                    modifier = Modifier
+                        .weight(1f)
+                        .size(32.dp) // TAMAÑO REDUCIDO
+                ) {
+                    Text(
+                        "-",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+
+                IconButton(
+                    onClick = {
+                        if (valor < rangoMax && enabled) {
+                            val nuevoValor = valor.add(BigDecimal.ONE).min(rangoMax)
+                            onValorCambiado(nuevoValor)
+                        }
+                    },
+                    enabled = enabled && valor < rangoMax,
+                    modifier = Modifier
+                        .weight(1f)
+                        .size(32.dp)
+                ) {
+                    Text(
+                        "+",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
         }
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SingleUserDropdown(
     opciones: List<String>,
-    seleccionado: Int?, // solo uno o ninguno
+    seleccionado: Int?,
+    placeholder: String = "Selecciona usuario",
     onSeleccionCambio: (Int?) -> Unit
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
-    val textoSeleccionado = seleccionado?.let { opciones.getOrNull(it) } ?: "Selecciona usuario"
+    val textoSeleccionado = seleccionado?.let {
+        opciones.getOrNull(it)
+    } ?: placeholder
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -271,7 +345,7 @@ fun SingleUserDropdown(
             value = textoSeleccionado,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Usuario") },
+            label = {  },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier
                 .menuAnchor()

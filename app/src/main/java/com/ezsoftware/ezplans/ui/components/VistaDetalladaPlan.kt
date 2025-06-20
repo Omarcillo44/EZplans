@@ -107,15 +107,23 @@ fun VistaDetalladaPlan(
 }
 
 class VistaDetPlanMenuConfig : MenuConfiguration() {
+    private val mostrarDialogo = mutableStateOf(false)
+    // Variables que se actualizarán al entrar a getMenuOptions
+    private var planId: Int = 0
+    private var navControlador: NavController? = null
+    private var viewmodelEliminar: EliminarPlanViewModel? = null
+
     override fun getMenuOptions(
         navController: NavController,
         onClose: () -> Unit,
         parameters: Map<String, Any?>
     ): List<MenuOption> {
-        val planId = parameters["planId"] as? Int ?: 0
+
+        this.planId = parameters["planId"] as? Int ?: 0
         val userId = parameters["userId"] as? Int ?: 0
         val adminId = parameters["adminId"] as? Int ?: 0
-        val viewmodelEliminar = parameters["viewmodel"] as? EliminarPlanViewModel
+        this.viewmodelEliminar = parameters["viewmodel"] as? EliminarPlanViewModel
+        this.navControlador = navController
 
         return (listOf(
             MenuOption(
@@ -126,15 +134,6 @@ class VistaDetPlanMenuConfig : MenuConfiguration() {
                     navController.navigate("CrearNuevaActividad/${planId}")
                     onClose()
                 }
-            ),
-            MenuOption(
-                id = "editar_plan",
-                texto = "Editar plan",
-                icono = Icons.Default.Edit,
-                onClick = {
-                    // TODO: ekisde
-                    onClose()
-                }
             )
         ) + if(userId == adminId) { // solo le aparece al admin
             listOf(
@@ -143,8 +142,16 @@ class VistaDetPlanMenuConfig : MenuConfiguration() {
                     texto = "Eliminar plan",
                     icono = Icons.Default.Delete,
                     onClick = {
-                        viewmodelEliminar?.eliminarPlan(planId)
-                        navController.navigate("UIPrincipal")
+                        mostrarDialogo.value = true
+                        onClose()
+                    }
+                ),
+                MenuOption(
+                    id = "editar_plan",
+                    texto = "Editar plan",
+                    icono = Icons.Default.Edit,
+                    onClick = {
+                        // TODO: ekisde
                         onClose()
                     }
                 )
@@ -160,6 +167,24 @@ class VistaDetPlanMenuConfig : MenuConfiguration() {
                 )
             )
         )
+    }
+    override fun getConfirmDialog(): (@Composable () -> Unit)? {
+        return if (mostrarDialogo.value) {
+            {
+                DialogoSiNo(
+                    mensaje = "¿Estás seguro de eliminar el plan?",
+                    onConfirmar = {
+
+                        viewmodelEliminar?.eliminarPlan(planId)
+                        mostrarDialogo.value = false
+                        navControlador?.navigate("UIPrincipal")
+                    },
+                    onCancelar = {
+                        mostrarDialogo.value = false
+                    }
+                )
+            }
+        } else null
     }
     // mensaje de ayuda mostrado
     override fun getHelpContent(): @Composable () -> Unit = {

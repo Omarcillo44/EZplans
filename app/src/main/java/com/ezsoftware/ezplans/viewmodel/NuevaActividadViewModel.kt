@@ -96,7 +96,7 @@ class NuevaActividadViewModel(application: Application) : AndroidViewModel(appli
                     
                     if (responseBody != null) {
                         Log.d("NuevaActividad", "Paso 6a: Body no nulo - Creando objeto respuesta...")
-                        val respuesta = RespuestaNuevaActividad.fromString(responseBody)
+                        val respuesta = RespuestaNuevaActividad.fromString(responseBody.toString())
                         Log.d("NuevaActividad", "Respuesta procesada:")
                         Log.d("NuevaActividad", "  - Mensaje: ${respuesta.mensaje}")
                         Log.d("NuevaActividad", "  - ID Actividad: ${respuesta.idActividad}")
