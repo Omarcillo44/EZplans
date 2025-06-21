@@ -326,6 +326,7 @@ fun SelectorDeNumeros(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SingleUserDropdown(
+    dropActivado: Boolean,
     opciones: List<String>,
     seleccionado: Int?,
     placeholder: String = "Selecciona usuario",
@@ -338,8 +339,10 @@ fun SingleUserDropdown(
     } ?: placeholder
 
     ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        expanded = if (dropActivado) expanded else false,
+        onExpandedChange = {
+            if (dropActivado) expanded = !expanded
+        }
     ) {
         OutlinedTextField(
             value = textoSeleccionado,

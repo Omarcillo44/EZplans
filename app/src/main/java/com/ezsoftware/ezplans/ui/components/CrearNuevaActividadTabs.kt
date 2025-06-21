@@ -2,6 +2,7 @@
 
 package com.ezsoftware.ezplans.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -207,6 +209,29 @@ fun TabContribuciones(
         }
     }
 
+    // NUEVO: Calcular y actualizar montos de deuda de forma centralizada
+    LaunchedEffect(miembrosContribuciones.map { "${it.idUsuario}-${it.aportacion}-${it.montoCorrespondiente}-${it.idAcreedorDeuda}" }.joinToString()) {
+        val nuevosmiembros = miembrosContribuciones.map { miembro ->
+            val diferencia = miembro.aportacion - miembro.montoCorrespondiente
+            val nuevoMontoDeuda = if (diferencia < BigDecimal.ZERO && miembro.idAcreedorDeuda != null) {
+                diferencia.abs()
+            } else {
+                BigDecimal.ZERO
+            }
+
+            if (miembro.montoDeuda != nuevoMontoDeuda) {
+                miembro.copy(montoDeuda = nuevoMontoDeuda)
+            } else {
+                miembro
+            }
+        }
+
+        // Solo actualizar si hay cambios reales
+        if (nuevosmiembros != miembrosContribuciones) {
+            onMiembrosContribucionesChange(nuevosmiembros)
+        }
+    }
+
     Column (
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 20.dp)
@@ -280,6 +305,9 @@ fun CardContribuciones(
         else -> "Sin deudas" to Color(0xFF9E9E9E)
     }
 
+    // ELIMINADO: LaunchedEffect que causaba conflictos
+    // El cálculo de montoDeuda ahora se maneja en el componente padre
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -350,16 +378,17 @@ fun CardContribuciones(
             }
 
             TextoPeq("¿A quién le debe?")
-
             // Determinar el índice seleccionado basado en idAcreedorDeuda
             val indiceAcreedorSeleccionado = miembro.idAcreedorDeuda?.let { idAcreedor ->
                 idsUsuarios.indexOf(idAcreedor).takeIf { it >= 0 }
             }
 
+            val dropActivado = diferencia < BigDecimal.ZERO
             SingleUserDropdown(
+                dropActivado = dropActivado,
                 opciones = todosLosUsuarios,
-                seleccionado = indiceAcreedorSeleccionado, // null por defecto si no hay acreedor
-                placeholder = "Sin acreedor (se debe a sí mismo)",
+                seleccionado = indiceAcreedorSeleccionado,
+                placeholder = "No aplica",
                 onSeleccionCambio = { indiceSeleccionado ->
                     val nuevoIdAcreedor = indiceSeleccionado?.let { indice ->
                         val idSeleccionado = idsUsuarios[indice]
@@ -367,19 +396,9 @@ fun CardContribuciones(
                         if (idSeleccionado == miembro.idUsuario) null else idSeleccionado
                     }
 
-                    val montoDeuda = if (diferencia < BigDecimal.ZERO &&
-                        indiceSeleccionado != null &&
-                        nuevoIdAcreedor != null) {
-                        diferencia.abs()
-                    } else {
-                        BigDecimal.ZERO
-                    }
-
+                    // Actualizar solo el idAcreedorDeuda, el montoDeuda se calculará automáticamente
                     onMiembroChange(
-                        miembro.copy(
-                            idAcreedorDeuda = nuevoIdAcreedor,
-                            montoDeuda = montoDeuda
-                        )
+                        miembro.copy(idAcreedorDeuda = nuevoIdAcreedor)
                     )
                 }
             )
@@ -444,72 +463,41 @@ fun TabResumenDeudas(
 
         // Mostrar diferentes mensajes según el estado
         when {
-            !hayContribuciones -> {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Configura las contribuciones",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "Ve al tab 'Contribuciones' para configurar quién pagó qué y cómo se dividirán los gastos.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
             deudasGeneradas.isEmpty() -> {
-                Card(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "¡Perfecto! No hay deudas",
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "Todos los gastos están balanceados. No hay pendientes por saldar.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No hay deudas",
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "No hay pendientes por saldar.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -609,31 +597,66 @@ fun CardResumenDeudas(
                     )
                 }
 
-                // Acreedor
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        Texto(acreedor)
-                        TextoPeq("Acreedor")
-                    }
+                val estaVertical = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+
+                if(estaVertical){
                     Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondary),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd
                     ) {
-                        TextoPeq(
-                            acreedor.split(" ")
-                                .mapNotNull { it.firstOrNull()?.toString() }
-                                .take(2)
-                                .joinToString(""),
-                            MaterialTheme.colorScheme.onSecondary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                Texto(acreedor)
+                                TextoPeq("Acreedor")
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.secondary),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                TextoPeq(
+                                    acreedor.split(" ")
+                                        .mapNotNull { it.firstOrNull()?.toString() }
+                                        .take(2)
+                                        .joinToString(""),
+                                    MaterialTheme.colorScheme.onSecondary
+                                )
+                            }
+                        }
+                    }
+                }else{
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            Texto(acreedor)
+                            TextoPeq("Acreedor")
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.secondary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            TextoPeq(
+                                acreedor.split(" ")
+                                    .mapNotNull { it.firstOrNull()?.toString() }
+                                    .take(2)
+                                    .joinToString(""),
+                                MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
                     }
                 }
             }
@@ -713,12 +736,18 @@ fun CardResumenActividad(
                 Column (modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(5.dp)){
                     Texto("Participantes")
-                    Texto("${participantes} personas", true)
+                    if(participantes == 1)
+                        Texto("${participantes} persona", true)
+                    else
+                        Texto("${participantes} personas", true)
                 }
                 Column (modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(5.dp)){
                     Texto("Deudas generadas")
-                    Texto("${cantidadDeudas} transacción", true)
+                    if(cantidadDeudas == 1)
+                        Texto("${cantidadDeudas} transacción", true)
+                    else
+                        Texto("${cantidadDeudas} transacciónes", true)
                 }
             }
         }

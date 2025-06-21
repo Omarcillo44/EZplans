@@ -312,7 +312,7 @@ fun BotonesNuevoPlan(
                             habilitado = false
                             showDialogo.value = true
                             scope.launch {
-                                delay(2500)
+                                delay(2000)
                                 // TODO: SE HACE el trabajo pesado xd
                                 val miembros = buildList {
                                     add(DatosMiembrosNuevoPlan(idUsuario = idUsuario, administrador = true)) // agregas al admin
@@ -334,14 +334,16 @@ fun BotonesNuevoPlan(
                                         Log.d("Plan", "Éxito: $mensaje")
                                         // desspues de el proceso de crear el plan se regresa la ventana principal
                                         Toast.makeText(context, "Plan creado correctamente", Toast.LENGTH_SHORT).show()
+                                        navControlador.navigate("UIPrincipal")
+                                        showDialogo.value = false
                                     },
                                     onError = { error ->
                                         Log.e("Plan", "Error: $error")
                                         Toast.makeText(context, "Plan creado incorrectamente. Intentelo nuevamente.", Toast.LENGTH_SHORT).show()
+                                        navControlador.navigate("UIPrincipal")
+                                        showDialogo.value = false
                                     }
                                 )
-                                navControlador.navigate("UIPrincipal")
-                                showDialogo.value = false
                                 //habilitado = true
                             }
                         }

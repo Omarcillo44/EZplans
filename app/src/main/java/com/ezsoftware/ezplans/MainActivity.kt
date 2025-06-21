@@ -20,6 +20,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
 import com.ezsoftware.ezplans.ui.components.CrearNuevoPlan

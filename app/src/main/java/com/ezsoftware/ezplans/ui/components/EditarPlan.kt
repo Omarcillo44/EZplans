@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -118,6 +120,37 @@ fun EditarPlan(
             }
         }
     }
+
+    MenuFab(
+        navController = navControlador,
+        themeViewModel = themeViewModel,
+        menuConfig = EditarPlanMenuConfig()
+    )
+}
+
+class EditarPlanMenuConfig : MenuConfiguration() {
+    override fun getMenuOptions(
+        navController: NavController,
+        onClose: () -> Unit,
+        parameters: Map<String, Any?>
+    ): List<MenuOption> {
+        return listOf(
+            MenuOption(
+                id = "ayuda",
+                texto = "Ayuda",
+                icono = Icons.Default.Info,
+                onClick = { /* Se maneja en el componente principal */ }
+            )
+        )
+    }
+    override fun getHelpContent(): @Composable () -> Unit = {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
+            Text(
+                "Ayuda de editar plan",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @Composable
@@ -205,7 +238,7 @@ fun BotonesEditarPlan(
                     habilitado = false
                     showDialogo.value = true
                     scope.launch {
-                        delay(2500)
+                        delay(2000)
                         // TODO: SE HACE el trabajo pesado xd
                         val datosEditarPlan = DatosEditarPlan(
                             idPlan = idPlan,
@@ -219,13 +252,15 @@ fun BotonesEditarPlan(
                             onComplete = { exito ->
                                 if (exito) {
                                     Toast.makeText(context, "Plan actualizado correctamente", Toast.LENGTH_SHORT).show()
+                                    navControlador.navigate("VistaDetalladaPlan/${idPlan}")
+                                    showDialogo.value = false
                                 } else {
                                     Toast.makeText(context, "Error al actualizar el plan", Toast.LENGTH_LONG).show()
+                                    navControlador.navigate("VistaDetalladaPlan/${idPlan}")
+                                    showDialogo.value = false
                                 }
                             }
                         )
-                        navControlador.navigate("VistaDetalladaPlan/${idPlan}")
-                        showDialogo.value = false
                         //habilitado = true
                     }
                 }

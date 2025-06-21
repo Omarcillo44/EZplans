@@ -88,7 +88,7 @@ fun CrearNuevaActividad(
     var selectedTab = rememberSaveable { mutableStateOf(0) }
     var datosMiembrosPlan by rememberSaveable { mutableStateOf(listOf<DatosUsuarioEnPlan>()) }
 
-    //  lista para manejar los datos de contribuciones
+    // MODIFICADO: Usar remember en lugar de rememberSaveable para permitir actualizaciones
     var miembrosContribuciones by rememberSaveable {
         mutableStateOf(listOf<DatosMiembrosNuevaActividad>())
     }
@@ -101,37 +101,67 @@ fun CrearNuevaActividad(
         }
     }
 
-    // Solo actualizar contribuciones si la lista está vacía
-    LaunchedEffect(usuariosSelect) {
-        if (usuariosSelect.isNotEmpty() && miembrosContribuciones.isEmpty()) {
-            miembrosContribuciones = usuariosSelect.map { idUsuario ->
-                DatosMiembrosNuevaActividad(
-                    idUsuario = idUsuario,
-                    aportacion = BigDecimal.ZERO,
-                    idAcreedorDeuda = null,
-                    montoDeuda = BigDecimal.ZERO,
-                    montoCorrespondiente = BigDecimal.ZERO
-                )
-            }
-        } else if (usuariosSelect.isNotEmpty() && miembrosContribuciones.isNotEmpty()) {
-            // Sincronizar cambios en selección de usuarios manteniendo datos existentes
-            val usuariosActuales = miembrosContribuciones.map { it.idUsuario }
-            val usuariosNuevos = usuariosSelect - usuariosActuales.toSet()
-            val usuariosEliminados = usuariosActuales - usuariosSelect.toSet()
+    // MEJORADO: Lógica de sincronización de contribuciones más robusta
+    LaunchedEffect(usuariosSelect, datosMiembrosPlan) {
+        if (usuariosSelect.isNotEmpty()) {
+            // Si no hay contribuciones, crear nuevas
+            if (miembrosContribuciones.isEmpty()) {
+                miembrosContribuciones = usuariosSelect.map { idUsuario ->
+                    DatosMiembrosNuevaActividad(
+                        idUsuario = idUsuario,
+                        aportacion = BigDecimal.ZERO,
+                        idAcreedorDeuda = null,
+                        montoDeuda = BigDecimal.ZERO,
+                        montoCorrespondiente = BigDecimal.ZERO
+                    )
+                }
+            } else {
+                // Sincronizar cambios manteniendo datos existentes
+                val usuariosActuales = miembrosContribuciones.map { it.idUsuario }.toSet()
+                val usuariosNuevosSet = usuariosSelect.toSet()
 
-            if (usuariosNuevos.isNotEmpty() || usuariosEliminados.isNotEmpty()) {
-                val contribucionesActualizadas = miembrosContribuciones
-                    .filter { it.idUsuario in usuariosSelect } + // Mantener existentes
-                        usuariosNuevos.map { idUsuario -> // Agregar nuevos
-                            DatosMiembrosNuevaActividad(
-                                idUsuario = idUsuario,
-                                aportacion = BigDecimal.ZERO,
-                                idAcreedorDeuda = null,
-                                montoDeuda = BigDecimal.ZERO,
-                                montoCorrespondiente = BigDecimal.ZERO
-                            )
-                        }
-                miembrosContribuciones = contribucionesActualizadas
+                // Solo actualizar si hay cambios reales
+                if (usuariosActuales != usuariosNuevosSet) {
+                    val usuariosNuevos = usuariosNuevosSet - usuariosActuales
+
+                    val contribucionesActualizadas = miembrosContribuciones
+                        .filter { it.idUsuario in usuariosSelect } + // Mantener existentes
+                            usuariosNuevos.map { idUsuario -> // Agregar nuevos
+                                DatosMiembrosNuevaActividad(
+                                    idUsuario = idUsuario,
+                                    aportacion = BigDecimal.ZERO,
+                                    idAcreedorDeuda = null,
+                                    montoDeuda = BigDecimal.ZERO,
+                                    montoCorrespondiente = BigDecimal.ZERO
+                                )
+                            }
+
+                    miembrosContribuciones = contribucionesActualizadas
+                }
+            }
+        }
+    }
+
+    // NUEVO: Effect para limpiar acreedores que ya no están seleccionados
+    LaunchedEffect(usuariosSelect, miembrosContribuciones) {
+        if (miembrosContribuciones.isNotEmpty()) {
+            val usuariosSelectSet = usuariosSelect.toSet()
+            val contribucionesLimpias = miembrosContribuciones.map { contribucion ->
+                // Si el acreedor ya no está en la lista de usuarios seleccionados, limpiarlo
+                if (contribucion.idAcreedorDeuda != null &&
+                    contribucion.idAcreedorDeuda !in usuariosSelectSet) {
+                    contribucion.copy(
+                        idAcreedorDeuda = null,
+                        montoDeuda = BigDecimal.ZERO
+                    )
+                } else {
+                    contribucion
+                }
+            }
+
+            // Solo actualizar si hay cambios
+            if (contribucionesLimpias != miembrosContribuciones) {
+                miembrosContribuciones = contribucionesLimpias
             }
         }
     }
@@ -144,22 +174,30 @@ fun CrearNuevaActividad(
     else
         miembrosContribuciones.sumOf { it.montoCorrespondiente }
 
-    if (gastoTotal == BigDecimal.ZERO) {
-        miembrosContribuciones = miembrosContribuciones.map {
-            it.copy(montoCorrespondiente = BigDecimal.ZERO)
+    // MODIFICADO: Limpiar montos correspondientes cuando no hay gasto total
+    LaunchedEffect(gastoTotal) {
+        if (gastoTotal == BigDecimal.ZERO && miembrosContribuciones.isNotEmpty()) {
+            val contribucionesLimpias = miembrosContribuciones.map {
+                it.copy(
+                    montoCorrespondiente = BigDecimal.ZERO,
+                    idAcreedorDeuda = null,
+                    montoDeuda = BigDecimal.ZERO
+                )
+            }
+            miembrosContribuciones = contribucionesLimpias
         }
     }
 
     val diferencia = totalPagado.subtract(totalDebePagar).setScale(2, RoundingMode.HALF_UP)
 
-    val epsilon = BigDecimal("0.01") // o "0.005" si prefieres
+    val epsilon = BigDecimal("0.01")
     val hayErrorDiferencia = diferencia.abs() > epsilon
     var mostrarError by remember { mutableStateOf(false) }
     var ultimoTiempoValidacion by remember { mutableStateOf(0L) }
 
     LaunchedEffect(totalPagado, totalDebePagar) {
         ultimoTiempoValidacion = System.currentTimeMillis()
-        delay(500) // Espera 500ms después del último cambio
+        delay(500)
 
         if (System.currentTimeMillis() - ultimoTiempoValidacion >= 500) {
             val redondeadoPagado = totalPagado.setScale(2, RoundingMode.HALF_UP)
@@ -506,7 +544,7 @@ fun BotonesNuevaActividad(
                         habilitado = false
                         showDialogo.value = true
                         scope.launch {
-                            delay(2500)
+                            delay(2000)
                             // TODO: SE HACE el trabajo pesado xd
                             val datosNuevaActividad = DatosNuevaActividad(
                                 idPlan = idPlan,
@@ -518,17 +556,20 @@ fun BotonesNuevaActividad(
                             nuevaActividadViewModel.crearNuevaActividad(
                                 datosActividad = datosNuevaActividad,
                                 onSuccess = { mensaje ->
+
                                     Log.d("Actividad", "Éxito: $mensaje")
                                     // desspues de el proceso de crear el plan se regresa la ventana principal
                                     Toast.makeText(context, "Actividad creada correctamente", Toast.LENGTH_SHORT).show()
+                                    navControlador.navigate("VistaDetalladaPlan/${idPlan}")
+                                    showDialogo.value = false
                                 },
                                 onError = { error ->
                                     Log.e("Actividad", "Error: $error")
                                     Toast.makeText(context, "Actividad creada incorrectamente. Intentelo nuevamente.", Toast.LENGTH_SHORT).show()
+                                    navControlador.navigate("VistaDetalladaPlan/${idPlan}")
+                                    showDialogo.value = false
                                 }
                             )
-                            navControlador.navigate("VistaDetalladaPlan/${idPlan}")
-                            showDialogo.value = false
                             //habilitado = true
                         }
                     }
@@ -543,7 +584,7 @@ fun BotonesNuevaActividad(
                     Row (verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(Modifier.size(24.dp))
                         Spacer(Modifier.width(16.dp))
-                        Text("Creando Plan")
+                        Text("Creando Actividad")
                     }
                 },
                 confirmButton = { /*TODO*/ }
