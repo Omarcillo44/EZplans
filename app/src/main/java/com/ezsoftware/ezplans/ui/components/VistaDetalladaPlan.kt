@@ -92,6 +92,9 @@ fun VistaDetalladaPlan(
                 item { ResumenPlan(datos.resumenPlan) }
 
                 item { TabsPlan(
+                    navControlador = navControlador,
+                    datos.resumenPlan.idPlan,
+                    datos.resumenPlan.tituloPlan,
                     datos.actividades,
                     datos.miembros,
                     datos.deudas)
@@ -326,6 +329,9 @@ fun ResumenDet(
 
 @Composable
 fun TabsPlan(
+    navControlador: NavController,
+    idPlan: Int,
+    nombrePlan: String,
     actividades: List<DatosActividadPlan>,
     miembros: List<DatosResumenMiembrosPlan>,
     deudas : List<DatosDeudasPorPlan>
@@ -347,7 +353,7 @@ fun TabsPlan(
         when (selectedTab.value) {
             0 -> TabActividades(actividades)
             1 -> TabMiembros(miembros)
-            2 -> TabDeudas(deudas)
+            2 -> TabDeudas(navControlador, idPlan, nombrePlan, deudas)
         }
     }
 }

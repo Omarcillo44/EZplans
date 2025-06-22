@@ -77,10 +77,10 @@ class NuevoPagoViewModel(application: Application) : AndroidViewModel(applicatio
                     val responseBody = response.body()
                     Log.d(TAG, "Pago registrado exitosamente: $responseBody")
                     
-                    _successMessage.value = responseBody ?: "Pago registrado con éxito"
+                    _successMessage.value = (responseBody ?: "Pago registrado con éxito").toString()
                     _pagoRegistrado.value = true
                     
-                    onSuccess(responseBody ?: "Pago registrado con éxito")
+                    onSuccess((responseBody ?: "Pago registrado con éxito").toString())
                 } else {
                     val errorBody = response.errorBody()?.string()
                     val errorMsg = "Error ${response.code()}: ${response.message()}"

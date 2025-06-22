@@ -61,7 +61,7 @@ interface ApiService {
     suspend fun registrarNuevoPago(
         @Body datosPago: DatosNuevoPago,
         @Header("Authorization") token: String
-    ): Response<String>
+    ): Response<ResponseBody>
 
     @POST("/actividades/nueva_actividad")
     suspend fun crearNuevaActividad(

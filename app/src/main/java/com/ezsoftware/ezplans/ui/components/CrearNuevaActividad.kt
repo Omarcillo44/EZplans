@@ -88,12 +88,10 @@ fun CrearNuevaActividad(
     var selectedTab = rememberSaveable { mutableStateOf(0) }
     var datosMiembrosPlan by rememberSaveable { mutableStateOf(listOf<DatosUsuarioEnPlan>()) }
 
-    // MODIFICADO: Usar remember en lugar de rememberSaveable para permitir actualizaciones
     var miembrosContribuciones by rememberSaveable {
         mutableStateOf(listOf<DatosMiembrosNuevaActividad>())
     }
 
-    // Precarga de datos SOLO cuando se cargan por primera vez
     LaunchedEffect(datosMiembrosPlan) {
         if (datosMiembrosPlan.isNotEmpty() && usuariosSelect.isEmpty()) {
             usuariosSelect = datosMiembrosPlan.map { it.idUsuario }
@@ -101,7 +99,6 @@ fun CrearNuevaActividad(
         }
     }
 
-    // MEJORADO: Lógica de sincronización de contribuciones más robusta
     LaunchedEffect(usuariosSelect, datosMiembrosPlan) {
         if (usuariosSelect.isNotEmpty()) {
             // Si no hay contribuciones, crear nuevas
@@ -142,7 +139,6 @@ fun CrearNuevaActividad(
         }
     }
 
-    // NUEVO: Effect para limpiar acreedores que ya no están seleccionados
     LaunchedEffect(usuariosSelect, miembrosContribuciones) {
         if (miembrosContribuciones.isNotEmpty()) {
             val usuariosSelectSet = usuariosSelect.toSet()
@@ -166,7 +162,6 @@ fun CrearNuevaActividad(
         }
     }
 
-    // Calcular gastos totales
     val gastoTotal = miembrosContribuciones.sumOf { it.aportacion }
     val totalPagado = miembrosContribuciones.sumOf { it.aportacion }
     val totalDebePagar = if (gastoTotal == BigDecimal.ZERO)
@@ -174,7 +169,6 @@ fun CrearNuevaActividad(
     else
         miembrosContribuciones.sumOf { it.montoCorrespondiente }
 
-    // MODIFICADO: Limpiar montos correspondientes cuando no hay gasto total
     LaunchedEffect(gastoTotal) {
         if (gastoTotal == BigDecimal.ZERO && miembrosContribuciones.isNotEmpty()) {
             val contribucionesLimpias = miembrosContribuciones.map {

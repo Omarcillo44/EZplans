@@ -1,9 +1,21 @@
 package com.ezsoftware.ezplans.ui.components
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
 import android.widget.NumberPicker
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +59,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -57,10 +70,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
@@ -193,16 +208,15 @@ fun SelectorDeNumeros(
     rangoMin: BigDecimal = BigDecimal.ZERO,
     rangoMax: BigDecimal = BigDecimal(999999.99),
     enabled: Boolean = true,
+    mostrarControlesLaterales: Boolean = false,
     onValorCambiado: (BigDecimal) -> Unit
 ) {
-    // Función para formatear número de forma inteligente
     fun formatearInteligente(valor: BigDecimal): String {
         return valor.formatearParaUI()
     }
 
     var texto by rememberSaveable { mutableStateOf(formatearInteligente(valor)) }
 
-    // Actualizar texto cuando cambia el valor externamente
     LaunchedEffect(valor) {
         texto = formatearInteligente(valor)
     }
@@ -210,14 +224,9 @@ fun SelectorDeNumeros(
     fun actualizarDesdeTexto(nuevoTexto: String) {
         if (!enabled) return
 
-        // Filtrar solo números y punto decimal
         val textoFiltrado = nuevoTexto.filter { it.isDigit() || it == '.' }
+        if (textoFiltrado.count { it == '.' } > 1) return
 
-        // Verificar que solo haya un punto decimal
-        val puntosDecimales = textoFiltrado.count { it == '.' }
-        if (puntosDecimales > 1) return
-
-        // Limitar a 2 decimales máximo
         val partes = textoFiltrado.split(".")
         val textoLimitado = if (partes.size == 2 && partes[1].length > 2) {
             "${partes[0]}.${partes[1].take(2)}"
@@ -230,12 +239,10 @@ fun SelectorDeNumeros(
         if (textoLimitado.isNotEmpty() && textoLimitado != ".") {
             try {
                 val valorDecimal = BigDecimal(textoLimitado)
-                if (valorDecimal >= rangoMin && valorDecimal <= rangoMax) {
+                if (valorDecimal in rangoMin..rangoMax) {
                     onValorCambiado(valorDecimal)
                 }
-            } catch (e: NumberFormatException) {
-                // Ignorar entrada inválida
-            }
+            } catch (_: NumberFormatException) {}
         }
     }
 
@@ -246,59 +253,40 @@ fun SelectorDeNumeros(
         elevation = CardDefaults.cardElevation(defaultElevation = if (enabled) 2.dp else 0.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 2.dp) // REDUCIDO padding vertical
-        ) {
-            // Campo de texto centrado con altura reducida
-            TextField(
-                value = texto,
-                onValueChange = { actualizarDesdeTexto(it) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                enabled = enabled,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                ),
-                textStyle = LocalTextStyle.current.copy(
-                    textAlign = TextAlign.Center,
-                )
-            )
-
-            // Botones de incremento/decremento con altura reducida
+        if (mostrarControlesLaterales) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(32.dp), // ALTURA FIJA REDUCIDA
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 4.dp)
             ) {
                 IconButton(
                     onClick = {
                         if (valor > rangoMin && enabled) {
-                            // CAMBIO: Decrementar de 1 en 1
                             val nuevoValor = valor.subtract(BigDecimal.ONE).max(rangoMin)
                             onValorCambiado(nuevoValor)
                         }
                     },
-                    enabled = enabled && valor > rangoMin,
+                    enabled = enabled && valor > rangoMin
+                ) {
+                    Text("-", style = MaterialTheme.typography.titleMedium)
+                }
+
+                TextField(
+                    value = texto,
+                    onValueChange = { actualizarDesdeTexto(it) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    enabled = enabled,
                     modifier = Modifier
                         .weight(1f)
-                        .size(32.dp) // TAMAÑO REDUCIDO
-                ) {
-                    Text(
-                        "-",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
+                        .padding(horizontal = 4.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    ),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                )
 
                 IconButton(
                     onClick = {
@@ -307,16 +295,67 @@ fun SelectorDeNumeros(
                             onValorCambiado(nuevoValor)
                         }
                     },
-                    enabled = enabled && valor < rangoMax,
-                    modifier = Modifier
-                        .weight(1f)
-                        .size(32.dp)
+                    enabled = enabled && valor < rangoMax
                 ) {
-                    Text(
-                        "+",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
+                    Text("+", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                TextField(
+                    value = texto,
+                    onValueChange = { actualizarDesdeTexto(it) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    enabled = enabled,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    ),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            if (valor > rangoMin && enabled) {
+                                val nuevoValor = valor.subtract(BigDecimal.ONE).max(rangoMin)
+                                onValorCambiado(nuevoValor)
+                            }
+                        },
+                        enabled = enabled && valor > rangoMin,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("-", style = MaterialTheme.typography.titleMedium)
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (valor < rangoMax && enabled) {
+                                val nuevoValor = valor.add(BigDecimal.ONE).min(rangoMax)
+                                onValorCambiado(nuevoValor)
+                            }
+                        },
+                        enabled = enabled && valor < rangoMax,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("+", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }
@@ -374,5 +413,138 @@ fun SingleUserDropdown(
     }
 }
 
+@Composable
+fun SelectorBoolean(
+    tituloOpcion1: String,
+    detalle1: String,
+    tituloOpcion2: String,
+    detalle2: String,
+    valorInicial: Boolean = true,
+    onCambio: (Boolean) -> Unit
+){
+    var seleccion by rememberSaveable { mutableStateOf(valorInicial) }
+
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = seleccion,
+                onClick = {
+                    seleccion = true
+                    onCambio(true)
+                }
+            )
+            Imagen("placeholder", 20)
+            Spacer(modifier = Modifier.size(5.dp))
+            Column {
+                Texto(tituloOpcion1)
+                TextoPeq(detalle1)
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = !seleccion,
+                onClick = {
+                    seleccion = false
+                    onCambio(false)
+                }
+            )
+            Imagen("placeholder", 20)
+            Spacer(modifier = Modifier.size(5.dp))
+            Column {
+                Texto(tituloOpcion2)
+                TextoPeq(detalle2)
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectorImagen(imagen: Bitmap?, onImagenSeleccionada: (Bitmap, String) -> Unit) {
+    val context = LocalContext.current
+    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val resolucion = 250
+
+    val permisoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        if (it) pendingAction?.invoke() else Toast.makeText(context, "Permiso denegado", Toast.LENGTH_LONG).show()
+    }
+
+    val galeriaLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            val bitmap = if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            } else {
+                val source = ImageDecoder.createSource(context.contentResolver, it)
+                ImageDecoder.decodeBitmap(source)
+            }
+
+            // Redimensionar y comprimir la imagen
+            val bitmapComprimido = redimensionarImagen(bitmap, resolucion, resolucion)
+            val base64String = bitmapToBase64(bitmapComprimido, 80)
+
+            onImagenSeleccionada(bitmapComprimido, base64String)
+        }
+    }
+
+    val camaraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+        bitmap?.let {
+            // Redimensionar y comprimir la imagen de la cámara
+            val bitmapComprimido = redimensionarImagen(it, resolucion, resolucion)
+            val base64String = bitmapToBase64(bitmapComprimido, 80)
+
+            onImagenSeleccionada(bitmapComprimido, base64String)
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(250.dp)
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                    RoundedCornerShape(8.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            imagen?.let {
+                Imagen(imagen)
+            } ?: Text("No hay imagen seleccionada.", textAlign = TextAlign.Center)
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Button(onClick = {
+                val accion = { galeriaLauncher.launch("image/*") }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) accion()
+                    else {
+                        pendingAction = accion
+                        permisoLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+                    }
+                } else accion()
+            }) {
+                Text("Galería")
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Button(onClick = {
+                val accion = { camaraLauncher.launch() }
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) accion()
+                else {
+                    pendingAction = accion
+                    permisoLauncher.launch(Manifest.permission.CAMERA)
+                }
+            }) {
+                Text("Cámara")
+            }
+        }
+    }
+}
 
 

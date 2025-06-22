@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosActividadPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosDeudasPorPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenMiembrosPlan
@@ -95,16 +96,26 @@ fun TabMiembros(datos: List<DatosResumenMiembrosPlan>) {
 }
 
 @Composable
-fun TabDeudas(datos: List<DatosDeudasPorPlan>) {
+fun TabDeudas(
+    navControlador: NavController,
+    idPlan: Int,
+    nombrePlan: String,
+    datos: List<DatosDeudasPorPlan>
+) {
     Column (verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .padding(horizontal = 5.dp, vertical = 12.dp)
     ){
         datos.forEach{ dato ->
-            CardTabDeudas(deudor = dato.nombreDeudor,
+            CardTabDeudas(
+                navControlador = navControlador,
+                idPlan = idPlan,
+                idDeuda = dato.idDeuda,
+                monto = dato.montoDeuda,
+                deudor = dato.nombreDeudor,
                 acreedor = dato.nombreAcreedor,
                 motivo = dato.tituloActividad,
-                monto= dato.montoDeuda,
+                plan = nombrePlan
             )
         }
     }
@@ -234,10 +245,14 @@ fun CardTabMiembros(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CardTabDeudas(
+    navControlador: NavController,
+    idPlan: Int,
+    idDeuda: Int,
+    monto: String,
     deudor: String,
     acreedor: String,
     motivo: String,
-    monto: String,
+    plan: String
 ){
     Card(
         modifier = Modifier
@@ -279,7 +294,7 @@ fun CardTabDeudas(
                             deudor.split(" ")
                                 .mapNotNull { it.firstOrNull()?.toString() }
                                 .joinToString(""),
-                            MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     TextoPeq("debe a")
@@ -294,7 +309,7 @@ fun CardTabDeudas(
                             acreedor.split(" ")
                                 .mapNotNull { it.firstOrNull()?.toString() }
                                 .joinToString(""),
-                            MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -328,7 +343,7 @@ fun CardTabDeudas(
                 Spacer(modifier = Modifier.size(5.dp))
                 Row {
                     Button(
-                        onClick = { /* acción */ },
+                        onClick = { navControlador.navigate("RegistrarPago/${idPlan}/${idDeuda}/${monto}/${deudor}/${acreedor}/${motivo}/${plan}") },
                         modifier = Modifier.wrapContentSize().height(35.dp),
                         shape = MaterialTheme.shapes.medium
                     ) {

@@ -27,6 +27,7 @@ import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
 import com.ezsoftware.ezplans.ui.components.CrearNuevoPlan
 import com.ezsoftware.ezplans.ui.components.EditarPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
+import com.ezsoftware.ezplans.ui.components.RegistrarPago
 import com.ezsoftware.ezplans.ui.components.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
@@ -35,6 +36,7 @@ import com.ezsoftware.ezplans.viewmodel.EditarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.EliminarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.MiembrosPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.NuevaActividadViewModel
+import com.ezsoftware.ezplans.viewmodel.NuevoPagoViewModel
 import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
@@ -92,6 +94,7 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
     val nuevaActividadViewModel: NuevaActividadViewModel = viewModel()
     val editarPlanViewModel: EditarPlanViewModel = viewModel()
     val vistaEditarPlanViewModel: VistaEditarPlanViewModel = viewModel()
+    val nuevoPagoViewModel: NuevoPagoViewModel = viewModel()
 
     /*Avísame mañana que hay que cambiar el start destination, ya iba a matar toda esta parte*/
     NavHost(navController = navControlador, startDestination = "UIPrincipal") {
@@ -112,6 +115,16 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
         composable("EditarPlan/{idPlan}") { backStackEntry ->
             val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
             EditarPlan(navControlador, themeViewModel, editarPlanViewModel, vistaEditarPlanViewModel, idPlan)
+        }
+        composable("RegistrarPago/{idPlan}/{idDeuda}/{monto}/{deudor}/{acreedor}/{motivo}/{plan}") { backStackEntry ->
+            val idPlan = backStackEntry.arguments?.getString("idPlan")?.toIntOrNull() ?: -1
+            val idDeuda = backStackEntry.arguments?.getString("idDeuda")?.toIntOrNull() ?: -1
+            val deudor = backStackEntry.arguments?.getString("deudor")?.takeIf { it.isNotBlank() } ?: "desconocido"
+            val acreedor = backStackEntry.arguments?.getString("acreedor")?.takeIf { it.isNotBlank() } ?: "desconocido"
+            val motivo = backStackEntry.arguments?.getString("motivo")?.takeIf { it.isNotBlank() } ?: "desconocido"
+            val monto = backStackEntry.arguments?.getString("monto")?.takeIf { it.isNotBlank() } ?: "desconocido"
+            val plan = backStackEntry.arguments?.getString("plan")?.takeIf { it.isNotBlank() } ?: "desconocido"
+            RegistrarPago(navControlador, themeViewModel, nuevoPagoViewModel, idPlan, idDeuda, monto, deudor, acreedor, motivo, plan)
         }
     }
 }

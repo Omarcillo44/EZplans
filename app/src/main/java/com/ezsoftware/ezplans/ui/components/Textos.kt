@@ -55,6 +55,7 @@ fun Texto(
 @Composable
 fun TextoPeq(
     texto: String,
+    bold: Boolean? = null,
     color: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier,
     textAlign: TextAlign? = null
@@ -62,6 +63,27 @@ fun TextoPeq(
     Text(
         text = texto,
         fontSize = 14.sp,
+        fontWeight = when (bold) {
+            true -> FontWeight.Bold
+            false -> FontWeight.Normal
+            null -> null
+        },
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun TextoAviso(
+    texto: String,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null
+){
+    Text(
+        text = texto,
+        fontSize = 13.sp,
         color = color,
         modifier = modifier,
         textAlign = textAlign

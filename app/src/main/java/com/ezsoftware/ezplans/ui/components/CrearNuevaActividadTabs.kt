@@ -92,8 +92,10 @@ fun TabInfoBasicaActiv(
 
         Spacer(modifier = Modifier.size(18.dp))
         Row (horizontalArrangement = Arrangement.spacedBy(8.dp)){
-            Icon(imageVector = Icons.Default.Info, "informacion")
-            TextoPeq("El gasto total se calculará automáticamente sumando las aportaciones de cada miembro en el siguiente paso")
+            Icon(imageVector = Icons.Default.Info,
+                "informacion",
+                        modifier = Modifier.size(16.dp))
+            TextoAviso("El gasto total se calculará automáticamente sumando las aportaciones de cada miembro en el siguiente paso")
         }
     }
 }
@@ -193,7 +195,6 @@ fun TabContribuciones(
     diferencia: BigDecimal,
     mostrarError: Boolean
 ){
-    // Mantener división exacta para cálculos internos
     LaunchedEffect(divisionIgual, gastoTotal, usuariosSelect.size) {
         if (divisionIgual && usuariosSelect.isNotEmpty() && gastoTotal > BigDecimal.ZERO) {
             val montoPorPersona = try {
@@ -209,7 +210,6 @@ fun TabContribuciones(
         }
     }
 
-    // NUEVO: Calcular y actualizar montos de deuda de forma centralizada
     LaunchedEffect(miembrosContribuciones.map { "${it.idUsuario}-${it.aportacion}-${it.montoCorrespondiente}-${it.idAcreedorDeuda}" }.joinToString()) {
         val nuevosmiembros = miembrosContribuciones.map { miembro ->
             val diferencia = miembro.aportacion - miembro.montoCorrespondiente
@@ -226,7 +226,6 @@ fun TabContribuciones(
             }
         }
 
-        // Solo actualizar si hay cambios reales
         if (nuevosmiembros != miembrosContribuciones) {
             onMiembrosContribucionesChange(nuevosmiembros)
         }
@@ -257,7 +256,7 @@ fun TabContribuciones(
                 Icon(imageVector = Icons.Default.Info, "informacion", tint = MaterialTheme.colorScheme.error)
                 TextoPeq(
                     "Los montos adeudados no coinciden con el total pagado. Diferencia: ${diferencia.abs().formatearParaUI()}",
-                    MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
@@ -304,9 +303,6 @@ fun CardContribuciones(
         diferencia < BigDecimal.ZERO -> "Debe $${diferencia.abs().formatearParaUI()}" to Color(0xFFF44336)
         else -> "Sin deudas" to Color(0xFF9E9E9E)
     }
-
-    // ELIMINADO: LaunchedEffect que causaba conflictos
-    // El cálculo de montoDeuda ahora se maneja en el componente padre
 
     Card(
         modifier = Modifier
@@ -396,7 +392,6 @@ fun CardContribuciones(
                         if (idSeleccionado == miembro.idUsuario) null else idSeleccionado
                     }
 
-                    // Actualizar solo el idAcreedorDeuda, el montoDeuda se calculará automáticamente
                     onMiembroChange(
                         miembro.copy(idAcreedorDeuda = nuevoIdAcreedor)
                     )
@@ -576,7 +571,7 @@ fun CardResumenDeudas(
                                 .mapNotNull { it.firstOrNull()?.toString() }
                                 .take(2)
                                 .joinToString(""),
-                            MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     Column {
@@ -626,7 +621,7 @@ fun CardResumenDeudas(
                                         .mapNotNull { it.firstOrNull()?.toString() }
                                         .take(2)
                                         .joinToString(""),
-                                    MaterialTheme.colorScheme.onSecondary
+                                    color = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
                         }
@@ -654,7 +649,7 @@ fun CardResumenDeudas(
                                     .mapNotNull { it.firstOrNull()?.toString() }
                                     .take(2)
                                     .joinToString(""),
-                                MaterialTheme.colorScheme.onSecondary
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
                         }
                     }
@@ -689,7 +684,7 @@ fun CardSeleccionMetodo(
         ) {
             Imagen("placeholder", 25)
             Texto(texto, false, textColor, Modifier.fillMaxWidth(), TextAlign.Center)
-            TextoPeq(descripcion, textColor, Modifier.fillMaxWidth(), TextAlign.Center)
+            TextoPeq(descripcion, false,textColor, Modifier.fillMaxWidth(), TextAlign.Center)
         }
     }
 }
