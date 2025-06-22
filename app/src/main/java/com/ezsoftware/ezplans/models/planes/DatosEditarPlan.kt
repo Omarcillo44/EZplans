@@ -1,7 +1,5 @@
 // DatosEditarPlan.kt
-package com.ezsoftware.ezplans.models
-
-import java.time.LocalDate
+package com.ezsoftware.ezplans.models.planes
 
 data class DatosEditarPlan(
     val idPlan: Int,

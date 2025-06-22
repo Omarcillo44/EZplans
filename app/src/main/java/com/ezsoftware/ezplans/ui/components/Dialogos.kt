@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -96,7 +97,7 @@ fun DialogoTema(
                     Text("Modo oscuro", style = MaterialTheme.typography.bodyLarge)
                 }
 
-                // Colores dinámicos (Android 12+)
+// Colores dinámicos (Android 12+)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -108,9 +109,11 @@ fun DialogoTema(
                             }
                             .padding(vertical = 6.dp)
                     ) {
-                        RadioButton(
-                            selected = themeViewModel.themeState.value.useDynamicColor,
-                            onClick = null
+                        Checkbox(
+                            checked = themeViewModel.themeState.value.useDynamicColor,
+                            onCheckedChange = { nuevoValor ->
+                                themeViewModel.setDynamicColor(nuevoValor)
+                            }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Colores dinámicos", style = MaterialTheme.typography.bodyLarge)

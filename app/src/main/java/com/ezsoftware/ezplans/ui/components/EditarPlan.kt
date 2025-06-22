@@ -34,14 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.ezsoftware.ezplans.models.DatosEditarPlan
-import com.ezsoftware.ezplans.models.DatosVistaEditarPlan
+import com.ezsoftware.ezplans.models.planes.DatosEditarPlan
+import com.ezsoftware.ezplans.models.planes.DatosVistaEditarPlan
 import com.ezsoftware.ezplans.viewmodel.EditarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaEditarPlanViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 @Composable
 fun EditarPlan(

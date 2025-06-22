@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ezsoftware.ezplans.models.RespuestaEliminarPlan
+import com.ezsoftware.ezplans.models.planes.RespuestaEliminarPlan
 import com.ezsoftware.ezplans.network.ApiService
 import com.ezsoftware.ezplans.network.RetrofitInstance
 import com.ezsoftware.ezplans.preferences.PreferenceHelper

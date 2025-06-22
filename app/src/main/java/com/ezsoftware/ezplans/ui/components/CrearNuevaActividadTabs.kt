@@ -742,7 +742,7 @@ fun CardResumenActividad(
                     if(cantidadDeudas == 1)
                         Texto("${cantidadDeudas} transacción", true)
                     else
-                        Texto("${cantidadDeudas} transacciónes", true)
+                        Texto("${cantidadDeudas} transacciones", true)
                 }
             }
         }

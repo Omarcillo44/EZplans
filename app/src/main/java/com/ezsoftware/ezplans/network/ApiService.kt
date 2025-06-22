@@ -1,7 +1,8 @@
 package com.ezsoftware.ezplans.network
 
-import com.ezsoftware.ezplans.models.DatosEditarPlan
-import com.ezsoftware.ezplans.models.DatosVistaEditarPlan
+import com.ezsoftware.ezplans.models.DatosVistaPago
+import com.ezsoftware.ezplans.models.planes.DatosEditarPlan
+import com.ezsoftware.ezplans.models.planes.DatosVistaEditarPlan
 import com.ezsoftware.ezplans.models.NuevaActividad.DatosNuevaActividad
 import com.ezsoftware.ezplans.models.Pagos.DatosNuevoPago
 import com.ezsoftware.ezplans.models.NuevoPlan.DatosNuevoPlan
@@ -88,4 +89,10 @@ interface ApiService {
         @Body datosPlan: DatosEditarPlan,
         @Header("Authorization") token: String
     ): Response<ResponseBody>
+
+    @GET("/pagos/ver")
+    suspend fun obtenerPagosUsuario(
+        @Query("idUsuario") idUsuario: Int,
+        @Header("Authorization") token: String
+    ): Response<List<DatosVistaPago>>
 }

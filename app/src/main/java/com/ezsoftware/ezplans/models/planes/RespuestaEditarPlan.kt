@@ -1,5 +1,5 @@
 // RespuestaEditarPlan.kt
-package com.ezsoftware.ezplans.models
+package com.ezsoftware.ezplans.models.planes
 
 import android.util.Log
 

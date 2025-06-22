@@ -7,8 +7,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ezsoftware.ezplans.models.DatosEditarPlan
-import com.ezsoftware.ezplans.models.RespuestaEditarPlan
+import com.ezsoftware.ezplans.models.planes.DatosEditarPlan
+import com.ezsoftware.ezplans.models.planes.RespuestaEditarPlan
 import com.ezsoftware.ezplans.network.ApiService
 import com.ezsoftware.ezplans.network.RetrofitInstance
 import com.ezsoftware.ezplans.preferences.PreferenceHelper

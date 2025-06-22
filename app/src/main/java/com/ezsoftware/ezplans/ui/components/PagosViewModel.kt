@@ -1,42 +1,47 @@
-// EditarPlanViewModel.kt
-package com.ezsoftware.ezplans.viewmodel
+// PagosViewModel.kt
+package com.ezsoftware.ezplans.ui.components
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ezsoftware.ezplans.models.planes.DatosVistaEditarPlan
+import com.ezsoftware.ezplans.models.DatosVistaPago
 import com.ezsoftware.ezplans.network.ApiService
 import com.ezsoftware.ezplans.network.RetrofitInstance
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import kotlinx.coroutines.launch
 
-class VistaEditarPlanViewModel(application: Application) : AndroidViewModel(application) {
+class PagosViewModel(application: Application) : AndroidViewModel(application) {
     private val apiService: ApiService = RetrofitInstance.api
     private val prefs = PreferenceHelper(application)
-    private val TAG = "EditarPlanVM"
+    private val TAG = "PagosVM"
 
     // Estados para la UI
-    private val _planData = mutableStateOf<DatosVistaEditarPlan?>(null)
-    val planData = _planData
+    private val _pagos = mutableStateOf<List<DatosVistaPago>>(emptyList())
+    val pagos: State<List<DatosVistaPago>> = _pagos
 
     private val _isLoading = mutableStateOf(false)
-    val isLoading = _isLoading
+    val isLoading: State<Boolean> = _isLoading
 
     private val _errorMessage = mutableStateOf<String?>(null)
-    val errorMessage = _errorMessage
+    val errorMessage: State<String?> = _errorMessage
 
-    fun obtenerDatosPlan(
-        idPlan: Int,
-        onComplete: (DatosVistaEditarPlan?) -> Unit = {}
+    private val _isEmpty = mutableStateOf(false)
+    val isEmpty: State<Boolean> = _isEmpty
+
+    fun obtenerPagosUsuario(
+        idUsuario: Int,
+        onComplete: (Boolean) -> Unit = {}
     ) {
         _isLoading.value = true
         _errorMessage.value = null
-        _planData.value = null
+        _isEmpty.value = false
+        _pagos.value = emptyList()
 
-        Log.d(TAG, "Solicitando datos para editar plan ID: $idPlan")
-        
+        Log.d(TAG, "Solicitando pagos para usuario ID: $idUsuario")
+
         viewModelScope.launch {
             try {
                 val token = prefs.leerToken() ?: run {
@@ -45,29 +50,32 @@ class VistaEditarPlanViewModel(application: Application) : AndroidViewModel(appl
                     return@launch
                 }
 
-                Log.d(TAG, "Token obtenido, realizando petición...")
-                
-                val response = apiService.obtenerDatosEditarPlan(
-                    idPlan = idPlan,
+                val response = apiService.obtenerPagosUsuario(
+                    idUsuario = idUsuario,
                     token = "Bearer $token"
                 )
 
                 Log.d(TAG, "Respuesta recibida - Código: ${response.code()}")
-                
+
                 when {
                     response.isSuccessful -> {
-                        response.body()?.let { datosPlan ->
-                            Log.d(TAG, "Datos recibidos: $datosPlan")
-                            _planData.value = datosPlan
-                            onComplete(datosPlan)
+                        response.body()?.let { listaPagos ->
+                            if (listaPagos.isEmpty()) {
+                                _isEmpty.value = true
+                                Log.d(TAG, "El usuario no tiene pagos registrados")
+                            } else {
+                                _pagos.value = listaPagos
+                                Log.d(TAG, "Pagos obtenidos: ${listaPagos.size} registros")
+                            }
+                            onComplete(true)
                         } ?: run {
-                            _errorMessage.value = "Datos no encontrados"
+                            _errorMessage.value = "Datos no disponibles"
                             Log.e(TAG, "Error: Respuesta vacía")
                         }
                     }
-                    response.code() == 404 -> {
-                        _errorMessage.value = "Plan no encontrado"
-                        Log.e(TAG, "Error: Plan no encontrado")
+                    response.code() == 204 -> {
+                        _isEmpty.value = true
+                        Log.d(TAG, "El usuario no tiene pagos (204 No Content)")
                     }
                     else -> {
                         val errorMsg = "Error ${response.code()}: ${response.message()}"
@@ -89,6 +97,7 @@ class VistaEditarPlanViewModel(application: Application) : AndroidViewModel(appl
     fun limpiarEstados() {
         Log.d(TAG, "Limpiando estados del ViewModel")
         _errorMessage.value = null
-        _planData.value = null
+        _pagos.value = emptyList()
+        _isEmpty.value = false
     }
 }
