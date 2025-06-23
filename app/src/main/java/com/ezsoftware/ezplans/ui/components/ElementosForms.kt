@@ -462,7 +462,7 @@ fun SelectorBoolean(
 fun SelectorImagen(imagen: Bitmap?, onImagenSeleccionada: (Bitmap, String) -> Unit) {
     val context = LocalContext.current
     var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
-    val resolucion = 250
+    val resolucion = 1024
 
     val permisoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         if (it) pendingAction?.invoke() else Toast.makeText(context, "Permiso denegado", Toast.LENGTH_LONG).show()

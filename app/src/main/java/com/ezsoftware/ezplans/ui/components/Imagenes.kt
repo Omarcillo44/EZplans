@@ -5,21 +5,18 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,10 +24,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import java.io.ByteArrayOutputStream
 
 @Composable
@@ -87,7 +88,7 @@ fun base64ToBitmap(base64Str: String): Bitmap? {
 }
 
 // Metodo mejorado para convertir Bitmap a Base64 con compresión
-fun bitmapToBase64(bitmap: Bitmap, quality: Int = 80): String {
+fun bitmapToBase64(bitmap: Bitmap, quality: Int = 100): String {
     val outputStream = ByteArrayOutputStream()
     bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
     val byteArray = outputStream.toByteArray()
@@ -109,4 +110,75 @@ fun redimensionarImagen(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val newHeight = (height * scale).toInt()
 
     return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+}
+
+@Composable
+fun VisorImagen(
+    base64Image: String,
+    onDismiss: () -> Unit
+) {
+    val bitmap = remember(base64Image) {
+        base64ToBitmap(base64Image)
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.9f))
+        ) {
+            // Botón cerrar
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.5f),
+                        CircleShape
+                    )
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Cerrar",
+                    tint = Color.White
+                )
+            }
+
+            // Área clickeable para cerrar (solo en los bordes)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null, // Sin efecto visual
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onDismiss() }
+            )
+
+            // Imagen (NO clickeable para evitar conflicto)
+            bitmap?.let { bmp ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        bitmap = bmp.asImageBitmap(),
+                        contentDescription = "Comprobante ampliado",
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
+        }
+    }
 }

@@ -23,8 +23,10 @@ import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
 import com.ezsoftware.ezplans.ui.components.NuevoPlan.CrearNuevoPlan
 import com.ezsoftware.ezplans.ui.components.EditarPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
+import com.ezsoftware.ezplans.ui.components.PagosViewModel
 import com.ezsoftware.ezplans.ui.components.RegistrarPago
 import com.ezsoftware.ezplans.ui.components.VistaDetallada.VistaDetalladaPlan
+import com.ezsoftware.ezplans.ui.components.VistaPago
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel
@@ -91,6 +93,7 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
     val editarPlanViewModel: EditarPlanViewModel = viewModel()
     val vistaEditarPlanViewModel: VistaEditarPlanViewModel = viewModel()
     val nuevoPagoViewModel: NuevoPagoViewModel = viewModel()
+    val pagosViewModel: PagosViewModel = viewModel()
 
     /*Avísame mañana que hay que cambiar el start destination, ya iba a matar toda esta parte*/
     NavHost(navController = navControlador, startDestination = "UIPrincipal") {
@@ -121,6 +124,9 @@ fun AppNavegacion(themeViewModel: ThemeViewModel) {
             val monto = backStackEntry.arguments?.getString("monto")?.takeIf { it.isNotBlank() } ?: "desconocido"
             val plan = backStackEntry.arguments?.getString("plan")?.takeIf { it.isNotBlank() } ?: "desconocido"
             RegistrarPago(navControlador, themeViewModel, nuevoPagoViewModel, idPlan, idDeuda, monto, deudor, acreedor, motivo, plan)
+        }
+        composable("VistaPago") { backStackEntry ->
+            VistaPago(navControlador, themeViewModel, pagosViewModel)
         }
     }
 }

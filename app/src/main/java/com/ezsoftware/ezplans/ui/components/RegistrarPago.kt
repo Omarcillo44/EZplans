@@ -66,7 +66,7 @@ fun RegistrarPago(
     motivo: String,
     plan: String
 ){
-    var deudaOriginal = monto.replace("$", "").toDouble()
+    val deudaOriginal = monto.replace("$", "").replace(",", "").toDouble()
     var montoPago by rememberSaveable { mutableStateOf(BigDecimal.ZERO) }
     var seleccionFormaPago by rememberSaveable { mutableStateOf(true) }
     var imagenBase64 by rememberSaveable { mutableStateOf("") }

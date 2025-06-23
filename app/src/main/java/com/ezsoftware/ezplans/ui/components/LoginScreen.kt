@@ -3,6 +3,7 @@ package com.ezsoftware.ezplans.ui.components
 import android.view.Menu
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -51,109 +52,112 @@ fun LoginScreen(viewModel: AutenticacionViewModel, onLoginSuccess: () -> Unit) {
         Credencial("Tester", "5550430908", "contraseña"),  // Dulce Delgado Vázquez
     )
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .systemBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    LazyColumn {
+        item {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .systemBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Titulo("¡Bienvenido!")
-                Spacer(modifier = Modifier.size(15.dp))
-                Texto("Coloca tus datos para poder ingresar", true)
-            }
-            Imagen("plan_torre", 80)
-        }
-
-        Spacer(modifier = Modifier.size(40.dp))
-        OutlinedTextForms(
-            valor = celular,
-            label = "Celular",
-            hayError = errorCel,
-            ancho = 280.dp,
-            tipoTeclado = KeyboardType.Phone,
-            singleLine = true,
-            onValorChange = {
-                if (it.length <= 10 && it.all { c -> c.isDigit() }) {
-                    celular = it
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Titulo("¡Bienvenido!")
+                        Spacer(modifier = Modifier.size(15.dp))
+                        Texto("Coloca tus datos para poder ingresar", true)
+                    }
+                    Imagen("plan_torre", 80)
                 }
-                errorCel = false
-            }
-        )
 
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextForms(
-            valor = pass,
-            label = "Contraseña",
-            hayError = errorPass,
-            ancho = 280.dp,
-            singleLine = true,
-            tipoTeclado = KeyboardType.Password,
-            capitalizacion = KeyboardCapitalization.None,
-            transfVisual = PasswordVisualTransformation(),
-            onValorChange = {
-                pass = it
-                errorPass = false
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            if (celular.isBlank() || celular.length != 10) {
-                errorCel = true
-                error = null
-            } else if (pass.isBlank()) {
-                errorPass = true
-                error = null
-            } else {
-                viewModel.login(celular, pass,
-                    onSuccess = { onLoginSuccess() },
-                    onError = { error = it }
+                Spacer(modifier = Modifier.size(40.dp))
+                OutlinedTextForms(
+                    valor = celular,
+                    label = "Celular",
+                    hayError = errorCel,
+                    ancho = 280.dp,
+                    tipoTeclado = KeyboardType.Phone,
+                    singleLine = true,
+                    onValorChange = {
+                        if (it.length <= 10 && it.all { c -> c.isDigit() }) {
+                            celular = it
+                        }
+                        errorCel = false
+                    }
                 )
-            }
-        }) {
-            Text("Iniciar sesión")
-        }
 
-        error?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextForms(
+                    valor = pass,
+                    label = "Contraseña",
+                    hayError = errorPass,
+                    ancho = 280.dp,
+                    singleLine = true,
+                    tipoTeclado = KeyboardType.Password,
+                    capitalizacion = KeyboardCapitalization.None,
+                    transfVisual = PasswordVisualTransformation(),
+                    onValorChange = {
+                        pass = it
+                        errorPass = false
+                    }
+                )
 
-        if (errorCel) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Número de celular inválido",
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-
-        if (errorPass) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "La contraseña no puede estar vacía",
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        if (mostrarCredenciales) {
-            CredencialesTest(
-                credenciales = credencialesTest,
-                onCredentialSelected = { credencial ->
-                    celular = credencial.celular
-                    pass = credencial.password
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = {
+                    if (celular.isBlank() || celular.length != 10) {
+                        errorCel = true
+                        error = null
+                    } else if (pass.isBlank()) {
+                        errorPass = true
+                        error = null
+                    } else {
+                        viewModel.login(celular, pass,
+                            onSuccess = { onLoginSuccess() },
+                            onError = { error = it }
+                        )
+                    }
+                }) {
+                    Text("Iniciar sesión")
                 }
-            )
+
+                error?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
+
+                if (errorCel) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Número de celular inválido",
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+
+                if (errorPass) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "La contraseña no puede estar vacía",
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (mostrarCredenciales) {
+                    CredencialesTest(
+                        credenciales = credencialesTest,
+                        onCredentialSelected = { credencial ->
+                            celular = credencial.celular
+                            pass = credencial.password
+                        }
+                    )
+                }
+            }
         }
     }
 }

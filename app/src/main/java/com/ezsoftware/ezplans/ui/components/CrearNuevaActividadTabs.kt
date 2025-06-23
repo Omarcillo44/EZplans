@@ -453,7 +453,7 @@ fun TabResumenDeudas(
     ){
         Titulo("Resumen de Deudas")
         TextoPeq("Deudas generadas de la actividad")
-        Spacer(modifier = Modifier.size(25.dp))
+        Spacer(modifier = Modifier.size(20.dp))
 
         // Mostrar diferentes mensajes según el estado
         when {

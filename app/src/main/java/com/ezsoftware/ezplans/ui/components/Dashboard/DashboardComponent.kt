@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -116,6 +117,15 @@ class DashboardMenuConfig : MenuConfiguration() {
         parameters: Map<String, Any?>
     ): List<MenuOption> {
         return listOf(
+            MenuOption(
+                id = "ver_pagos",
+                texto = "Ver pagos realizados",
+                icono = Icons.Default.Payments,
+                onClick = {
+                    navController.navigate("VistaPago")
+                    onClose()
+                }
+            ),
             MenuOption(
                 id = "crear_plan",
                 texto = "Crear nuevo plan",
