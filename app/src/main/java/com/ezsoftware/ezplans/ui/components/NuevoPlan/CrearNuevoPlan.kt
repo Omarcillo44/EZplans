@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.ui.components
+package com.ezsoftware.ezplans.ui.components.NuevoPlan
 
 import android.util.Log
 import android.widget.Toast
@@ -10,16 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,7 +28,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,8 +46,13 @@ import com.ezsoftware.ezplans.models.NuevoPlan.DatosNuevoPlan
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
 import com.ezsoftware.ezplans.preferences.obtenerUsuariosDefault
+import com.ezsoftware.ezplans.ui.components.ButtonForms
+import com.ezsoftware.ezplans.ui.components.MenuConfiguration
+import com.ezsoftware.ezplans.ui.components.MenuFab
+import com.ezsoftware.ezplans.ui.components.MenuOption
+import com.ezsoftware.ezplans.ui.components.Texto
+import com.ezsoftware.ezplans.ui.components.Titulo
 import com.ezsoftware.ezplans.viewmodel.NuevoPlanViewModel
-import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -147,7 +148,9 @@ class NuevoPlanMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de crear nuevo plan",
+                "Crea un nuevo plan.\n" +
+                        "\nYa sabes: elige un título cool, ponle fecha (porque sí, eso importa), y si te sientes creativo, escribe detalles.\n" +
+                        "\nLuego recluta a tus víctimas… digo, participantes.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

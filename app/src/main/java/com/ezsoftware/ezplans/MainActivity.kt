@@ -1,6 +1,5 @@
 package com.ezsoftware.ezplans
 
-import android.content.Context
 import com.ezsoftware.ezplans.ui.components.Dashboard.DashboardComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,17 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
 import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
-import com.ezsoftware.ezplans.ui.components.CrearNuevoPlan
+import com.ezsoftware.ezplans.ui.components.NuevoPlan.CrearNuevoPlan
 import com.ezsoftware.ezplans.ui.components.EditarPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
 import com.ezsoftware.ezplans.ui.components.RegistrarPago
-import com.ezsoftware.ezplans.ui.components.VistaDetalladaPlan
+import com.ezsoftware.ezplans.ui.components.VistaDetallada.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.theme.EZplansTheme
 import com.ezsoftware.ezplans.viewmodel.AutenticacionViewModel
 import com.ezsoftware.ezplans.viewmodel.DashboardViewModel

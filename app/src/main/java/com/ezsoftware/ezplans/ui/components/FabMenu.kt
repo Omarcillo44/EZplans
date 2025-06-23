@@ -141,7 +141,7 @@ fun MenuFabCirculo(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 75.dp, end = 25.dp),
+            .padding(bottom = 90.dp, end = 35.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
         Column(horizontalAlignment = Alignment.End) {

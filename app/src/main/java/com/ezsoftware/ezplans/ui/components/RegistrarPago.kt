@@ -137,7 +137,9 @@ class RegistrarPagoMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de registrar pago",
+                "¿Te dignaste a pagar? Milagro (Espero no seas el administrador haciendo obras de caridad).\n" +
+                        "\nRegistra cuánto se pagó, cómo se pagó (aunque sea con buenas intenciones), y si quieres, hasta puedes subir una fotito del comprobante.\n" +
+                        "\nRecuerda: esto es solo un registro, no esperes que el dinero llegue solo.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

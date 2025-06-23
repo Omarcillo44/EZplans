@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.models.planes.DatosEditarPlan
 import com.ezsoftware.ezplans.models.planes.DatosVistaEditarPlan
+import com.ezsoftware.ezplans.ui.components.NuevoPlan.TabInfoBasica
 import com.ezsoftware.ezplans.viewmodel.EditarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaEditarPlanViewModel
@@ -145,7 +146,10 @@ class EditarPlanMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de editar plan",
+                "Sí, puedes cambiar el título, la fecha y los detalles del plan.\n"+
+                        "\nPero no, no puedes tocar miembros ni deudas." +
+                    "\n¿Por qué? Porque no somos valientes como para resolver ese caos.\n" +
+                        "\n¿El botón flotante? Solo sirve para cambiar el tema y pedir esta joyita de ayuda.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

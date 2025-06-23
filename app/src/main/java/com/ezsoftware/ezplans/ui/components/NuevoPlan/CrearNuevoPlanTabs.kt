@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.ui.components
+package com.ezsoftware.ezplans.ui.components.NuevoPlan
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,11 +14,17 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ezsoftware.ezplans.preferences.UsuarioRegistrado
+import com.ezsoftware.ezplans.ui.components.DatePickerField
+import com.ezsoftware.ezplans.ui.components.Imagen
+import com.ezsoftware.ezplans.ui.components.OutlinedTextForms
+import com.ezsoftware.ezplans.ui.components.SubTitulo
+import com.ezsoftware.ezplans.ui.components.Texto
+import com.ezsoftware.ezplans.ui.components.TextoPeq
+import com.ezsoftware.ezplans.ui.components.Titulo
 
 @Composable
 fun TabInfoBasica(
@@ -41,7 +47,7 @@ fun TabInfoBasica(
         TextoPeq("Información básica del plan")
         Spacer(modifier = Modifier.size(25.dp))
 
-        SubTitulo("Titulo del plan", false)
+        SubTitulo("Título del plan", false)
         OutlinedTextForms(
             valor = titulo,
             label = "Ej: Viaje a la playa",

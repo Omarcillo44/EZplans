@@ -293,7 +293,10 @@ class NuevaActivMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de crear nueva actividad",
+                "Hora de repartir culpas. \n" +
+                        "\nDefine qué se hizo, quién puso cuánto, y quién quedó debiendo.\n" +
+                        "\nSi los números no cuadran, no insistas: no eres Hacienda.\n" +
+                        "\nAsegúrate de que todo tenga sentido antes de continuar.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

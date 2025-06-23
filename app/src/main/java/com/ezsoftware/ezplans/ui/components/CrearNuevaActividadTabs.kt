@@ -38,12 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ezsoftware.ezplans.models.NuevaActividad.DatosMiembrosNuevaActividad
 import com.ezsoftware.ezplans.models.NuevaActividad.Miembros.DatosUsuarioEnPlan
-import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.ui.components.NuevoPlan.CardUsuariosDisp
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode

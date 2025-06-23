@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.ui.components
+package com.ezsoftware.ezplans.ui.components.VistaDetallada
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,9 +34,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ezsoftware.ezplans.models.dashboard.datosResumen
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosActividadPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosDeudasPorPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenMiembrosPlan
+import com.ezsoftware.ezplans.ui.components.Imagen
+import com.ezsoftware.ezplans.ui.components.Texto
+import com.ezsoftware.ezplans.ui.components.TextoPeq
 
 @Composable
 fun TabActividades(
@@ -158,12 +162,19 @@ fun CardTabActividad(
                 verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically)
             ) {
                 Row {
-                    Imagen("placeholder", 20)
+                    Imagen("miembros", 20)
                     Spacer(modifier = Modifier.size(5.dp))
                     TextoPeq(miembros)
                 }
                 Row {
-                    Imagen("placeholder", 20)
+                    Imagen(
+                        when (estado) {
+                            "Completo" -> "check"
+                            "Pendiente" -> "pendiente"
+                            else -> "placeholder"  // Opcional: valor por defecto
+                        },
+                        20
+                    )
                     Spacer(modifier = Modifier.size(5.dp))
                     TextoPeq(estado)
                 }
@@ -201,7 +212,7 @@ fun CardTabMiembros(
                 //horizontalArrangement = Arrangement.SpaceBetween,
                 //verticalAlignment = Alignment.CenterVertically
             ) {
-                Imagen("placeholder", 50)
+                Imagen("miembro", 50)
                 Spacer(modifier = Modifier.size(5.dp))
                 Column(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -213,7 +224,13 @@ fun CardTabMiembros(
                     .fillMaxSize(),
                     contentAlignment = Alignment.TopEnd
                 ){
-                    Imagen("placeholder", 20)
+                    Imagen(
+                        when (debe) {
+                            "N/A" -> "check"
+                            else -> "pendiente"  // Opcional: valor por defecto
+                        },
+                        20
+                    )
                 }
             }
             Spacer(modifier = Modifier.size(18.dp))
@@ -226,14 +243,14 @@ fun CardTabMiembros(
                 Row {
                     TextoPeq("Debe:")
                     Spacer(modifier = Modifier.size(10.dp))
-                    Imagen("placeholder", 20)
+                    Imagen("flecha_deuda", 20)
                     Spacer(modifier = Modifier.size(5.dp))
                     TextoPeq(debe)
                 }
                 Row {
                     TextoPeq("Aportó:")
                     Spacer(modifier = Modifier.size(10.dp))
-                    Imagen("placeholder", 20)
+                    Imagen("flecha_aportacion", 20)
                     Spacer(modifier = Modifier.size(5.dp))
                     TextoPeq(haber)
                 }

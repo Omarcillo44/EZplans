@@ -1,4 +1,4 @@
-package com.ezsoftware.ezplans.ui.components
+package com.ezsoftware.ezplans.ui.components.VistaDetallada
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -44,8 +44,14 @@ import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenMiembrosPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosResumenPlan
 import com.ezsoftware.ezplans.models.vistaDetallada.DatosVistaDetalladaPlan
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
-import com.ezsoftware.ezplans.preferences.obtenerUsuariosDefault
 import com.ezsoftware.ezplans.ui.components.Dashboard.ResumenCard
+import com.ezsoftware.ezplans.ui.components.DialogoSiNo
+import com.ezsoftware.ezplans.ui.components.Imagen
+import com.ezsoftware.ezplans.ui.components.MenuConfiguration
+import com.ezsoftware.ezplans.ui.components.MenuFab
+import com.ezsoftware.ezplans.ui.components.MenuOption
+import com.ezsoftware.ezplans.ui.components.SubTitulo
+import com.ezsoftware.ezplans.ui.components.TextoPeq
 import com.ezsoftware.ezplans.viewmodel.EliminarPlanViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 import com.ezsoftware.ezplans.viewmodel.VistaDetalladaViewModel
@@ -198,7 +204,10 @@ class VistaDetPlanMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de vista detallada plan",
+                "Aquí está el chismecito completo del plan:\n" +
+                        "\nquién hizo qué, cuánto se debe y si el plan sigue vivo o ya murió.\n" +
+                        "\nSi eres admin, el botón flotante te deja añadir actividades, editar o eliminar el plan.\n" +
+                        "\nSi no lo eres... solo puedes cambiar el tema y llorar con la ayuda.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -247,13 +256,20 @@ fun TituloVistaDet(
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             Row {
-                Imagen("placeholder", 20)
+                Imagen("calendario", 20)
                 Spacer(modifier = Modifier.size(5.dp))
                 TextoPeq(fecha)
             }
             Spacer(modifier = Modifier.size(10.dp))
             Row {
-                Imagen("placeholder", 20)
+                Imagen(
+                    when (estado) {
+                        "Completo" -> "check"
+                        "Pendiente" -> "pendiente"
+                        else -> "placeholder"  // Opcional: valor por defecto
+                    },
+                    20
+                )
                 Spacer(modifier = Modifier.size(5.dp))
                 TextoPeq(estado)
             }
@@ -297,7 +313,7 @@ fun ResumenDet(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ResumenCard(
-                titulo = "Gato Total",
+                titulo = "Gasto Total",
                 cantidad = gasto,
                 modifier = Modifier.weight(1f)
             )

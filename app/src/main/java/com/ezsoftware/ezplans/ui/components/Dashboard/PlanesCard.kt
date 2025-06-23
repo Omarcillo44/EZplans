@@ -29,7 +29,9 @@ fun PlanesCard(
     fecha: String,
     miembros: String,
     estado: String,
-    rol: String
+    rol: String,
+    iconoEstado: String = "placeholder",  // Puedes cambiar el valor por defecto
+    iconoRol: String = "placeholder"      // Puedes cambiar el valor por defecto
 ) {
     Card(
         modifier = Modifier
@@ -52,7 +54,7 @@ fun PlanesCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Imagen("placeholder", 50)
+                Imagen("plan4", 50)
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Box(modifier = Modifier.weight(1f)) {
@@ -69,7 +71,7 @@ fun PlanesCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Imagen("placeholder", 20)
+                        Imagen("gasto", 20)
                         Spacer(modifier = Modifier.size(5.dp))
                         TextoPeq(gasto)
                     }
@@ -77,7 +79,7 @@ fun PlanesCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Imagen("placeholder", 20)
+                        Imagen("calendario", 20)
                         Spacer(modifier = Modifier.size(5.dp))
                         TextoPeq(fecha)
                     }
@@ -92,19 +94,31 @@ fun PlanesCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row {
-                    Imagen("placeholder", 20)
+                    Imagen("miembros", 20)
                     Spacer(modifier = Modifier.size(10.dp))
                     TextoPeq(miembros)
                 }
                 Row {
-                    Imagen("placeholder", 20)
+                    Imagen(
+                        when (estado) {
+                            "Completo" -> "check"
+                            "Pendiente" -> "pendiente"
+                            else -> "placeholder"  // Opcional: valor por defecto
+                        },
+                        20
+                    )
                     Spacer(modifier = Modifier.size(10.dp))
                     TextoPeq(estado)
                 }
                 Row {
-                    Imagen("placeholder", 20)
-                    Spacer(modifier = Modifier.size(10.dp))
-                    TextoPeq(rol)
+                    Imagen(
+                        when (rol) {
+                            "Admin." -> "administrador"
+                            "Miembro" -> "miembro"
+                            else -> "placeholder"  // Opcional: valor por defecto
+                        },
+                        20
+                    )
                 }
             }
         }

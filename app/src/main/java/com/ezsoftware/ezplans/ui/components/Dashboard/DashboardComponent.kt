@@ -137,7 +137,12 @@ class DashboardMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de Dashboard",
+                "¿Confundido con tantos números? Tranquilo, este es solo tu resumen.\n" +
+                        "\nAquí ves lo que debes, lo que te " +
+                        "deben, y cuántos planes tienes.\n" +
+                        "\nUsa los filtros si te quieres sentir organizado.\n" +
+                        "\nPor cierto, ¿Ves ese botón flotante? Sirve para ver pagos, crear un nuevo plan, " +
+                        "cambiar el tema y pedir esta gloriosa ayuda.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
