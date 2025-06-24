@@ -533,16 +533,22 @@ fun SelectorImagen(imagen: Bitmap?, onImagenSeleccionada: (Bitmap, String) -> Un
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Button(onClick = {
-                val accion = { camaraLauncher.launch() }
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) accion()
-                else {
-                    pendingAction = accion
-                    permisoLauncher.launch(Manifest.permission.CAMERA)
-                }
-            }) {
+            val isButtonEnabled by remember { mutableStateOf(false) }
+
+            Button(
+                onClick = {
+                    val accion = { camaraLauncher.launch() }
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) accion()
+                    else {
+                        pendingAction = accion
+                        permisoLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                },
+                enabled = isButtonEnabled
+            ) {
                 Text("Cámara")
             }
+
         }
     }
 }
