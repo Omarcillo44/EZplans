@@ -1,5 +1,5 @@
 // PagosViewModel.kt
-package com.ezsoftware.ezplans.ui.components
+package com.ezsoftware.ezplans.viewmodel
 
 import android.app.Application
 import android.util.Log

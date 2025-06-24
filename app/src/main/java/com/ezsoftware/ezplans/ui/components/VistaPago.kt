@@ -24,7 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ezsoftware.ezplans.models.DatosVistaPago
 import com.ezsoftware.ezplans.preferences.PreferenceHelper
+import com.ezsoftware.ezplans.viewmodel.PagosViewModel
 import com.ezsoftware.ezplans.viewmodel.ThemeViewModel
 
 @Composable
@@ -140,7 +141,8 @@ class VistaPagoMenuConfig : MenuConfiguration() {
     override fun getHelpContent(): @Composable () -> Unit = {
         Column(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                "Ayuda de vista pago",
+                "Aquí ves a quién le pagaste, cuánto soltaste y lo que aún debes (porque claro, nunca es suficiente). También puedes ver la actividad y el plan, y si hay comprobante, tócalo para agrandarlo... como tu deuda.\n" +
+                        "El botón flotante, fiel como siempre: cambiar tema y revivir esta épica ayuda.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -353,7 +355,7 @@ fun CardSinPagos() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = Icons.Default.AttachMoney,
+                    imageVector = Icons.Default.Add,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(48.dp)

@@ -43,11 +43,11 @@ fun LoginScreen(viewModel: AutenticacionViewModel, onLoginSuccess: () -> Unit) {
 
     // Credenciales de prueba
     val credencialesTest = listOf(
-        Credencial("Administrador", "1234567890", "admin"),  // Juan el Caballo
         Credencial("Erick Huerta Valdepeña", "0123456789", "contraseña"),   // Erick Huerta Valdepeña
-        Credencial("Jimena", "5663516239", "contraseña"),  // Jimena Garrido Reyes
-        Credencial("Mauricio", "5535027625", "contraseña"),  // Mauricio Teodoro Rosales
         Credencial("Omar", "5561397608", "contraseña"),  // Omar Lorenzo
+        Credencial("Mauricio", "5535027625", "contraseña"),  // Mauricio Teodoro Rosales
+        Credencial("Jimena", "5663516239", "contraseña"),  // Jimena Garrido Reyes
+        Credencial("Administrador", "1234567890", "admin"),  // Juan el Caballo
         //Credencial("Tester", "5550430908", "contraseña"),  // Dulce Delgado Vázquez
     )
 

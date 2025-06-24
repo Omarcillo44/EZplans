@@ -166,18 +166,18 @@ fun CardTabActividad(
                     Spacer(modifier = Modifier.size(5.dp))
                     TextoPeq(miembros)
                 }
-                Row {
-                    Imagen(
-                        when (estado) {
-                            "Completo" -> "check"
-                            "Pendiente" -> "pendiente"
-                            else -> "placeholder"  // Opcional: valor por defecto
-                        },
-                        20
-                    )
-                    Spacer(modifier = Modifier.size(5.dp))
-                    TextoPeq(estado)
-                }
+//                Row {
+//                    Imagen(
+//                        when (estado) {
+//                            "Completa" -> "check"
+//                            "Pendiente" -> "pendiente"
+//                            else -> "placeholder"  // Opcional: valor por defecto
+//                        },
+//                        20
+//                    )
+//                    Spacer(modifier = Modifier.size(5.dp))
+//                    TextoPeq(estado)
+//                }
             }
         }
     }

@@ -23,7 +23,7 @@ import com.ezsoftware.ezplans.ui.components.CrearNuevaActividad
 import com.ezsoftware.ezplans.ui.components.NuevoPlan.CrearNuevoPlan
 import com.ezsoftware.ezplans.ui.components.EditarPlan
 import com.ezsoftware.ezplans.ui.components.LoginScreen
-import com.ezsoftware.ezplans.ui.components.PagosViewModel
+import com.ezsoftware.ezplans.viewmodel.PagosViewModel
 import com.ezsoftware.ezplans.ui.components.RegistrarPago
 import com.ezsoftware.ezplans.ui.components.VistaDetallada.VistaDetalladaPlan
 import com.ezsoftware.ezplans.ui.components.VistaPago
