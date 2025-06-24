@@ -226,7 +226,7 @@ fun CardTabMiembros(
                 ){
                     Imagen(
                         when (debe) {
-                            "N/A" -> "check"
+                            "$0" -> "check"
                             else -> "pendiente"  // Opcional: valor por defecto
                         },
                         20
